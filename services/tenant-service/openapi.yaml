@@ -1,0 +1,173 @@
+openapi: 3.1.0
+info:
+  title: Tenant Directory API
+  version: 1.0.0
+servers:
+- url: http://localhost:8081
+paths:
+  /v1/tenants/{tenantID}:
+    get:
+      summary: Tenant Directory preview
+      operationId: tenantserviceLookup
+      parameters:
+      - name: tenantID
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-zA-Z0-9-]{1,64}$
+          title: Tenantid
+      - name: X-Request-ID
+        in: header
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Forwarded across service boundaries. Invalid or absent IDs
+            are replaced.
+          title: X-Request-Id
+        description: Forwarded across service boundaries. Invalid or absent IDs are
+          replaced.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success_Result_'
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Correlation ID forwarded across service boundaries
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Bad Request
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Correlation ID forwarded across service boundaries
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Bad Gateway
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Correlation ID forwarded across service boundaries
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Failure'
+          description: Not Found
+          headers:
+            X-Request-ID:
+              schema:
+                type: string
+              description: Correlation ID forwarded across service boundaries
+components:
+  schemas:
+    Cause:
+      properties:
+        service:
+          type: string
+          title: Service
+        owner:
+          type: string
+          title: Owner
+        code:
+          type: string
+          title: Code
+      additionalProperties: false
+      type: object
+      required:
+      - service
+      - owner
+      - code
+      title: Cause
+    Failure:
+      properties:
+        error:
+          type: string
+          title: Error
+        request_id:
+          type: string
+          title: Request Id
+        root_cause:
+          $ref: '#/components/schemas/Cause'
+        failed_dependency:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Failed Dependency
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      - request_id
+      - root_cause
+      title: Failure
+    Result:
+      properties:
+        name:
+          type: string
+          title: Name
+        contact:
+          type: string
+          title: Contact
+        identity_status:
+          type: string
+          const: verified
+          title: Identity Status
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - contact
+      - identity_status
+      title: Result
+    Success_Result_:
+      properties:
+        service:
+          type: string
+          title: Service
+        owner:
+          type: string
+          title: Owner
+        request_id:
+          type: string
+          title: Request Id
+        tenant_id:
+          type: string
+          title: Tenant Id
+        checked_dependencies:
+          items:
+            type: string
+          type: array
+          title: Checked Dependencies
+        result:
+          $ref: '#/components/schemas/Result'
+        simulation:
+          type: boolean
+          const: true
+          title: Simulation
+      additionalProperties: false
+      type: object
+      required:
+      - service
+      - owner
+      - request_id
+      - tenant_id
+      - checked_dependencies
+      - result
+      - simulation
+      title: Success[Result]

@@ -1,0 +1,7 @@
+# Local convenience environment; each repository also installs independently.
+-r services/tenant-service/requirements-dev.txt
+-r services/subscription-service/requirements-dev.txt
+-r services/policy-service/requirements-dev.txt
+-r services/provisioning-service/requirements-dev.txt
+-r services/notification-service/requirements-dev.txt
+-r services/onboarding-service/requirements-dev.txt

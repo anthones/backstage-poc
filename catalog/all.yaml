@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: activation-poc
+  title: Activation POC catalog
+  description: ''
+spec:
+  type: file
+  targets:
+    - ./org.yaml
+    - ./platform.yaml

@@ -1,0 +1,18 @@
+# This repository runs and verifies without the integration workspace.
+image: python:3.12-slim
+stages: [verify, docs]
+
+before_script:
+  - pip install -r requirements-dev.txt
+
+verify:
+  stage: verify
+  script:
+    - ./ci/check.sh
+
+documentation:
+  stage: docs
+  script:
+    - ./ci/build-docs.sh
+  artifacts:
+    paths: [site/]

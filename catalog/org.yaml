@@ -1,0 +1,161 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: acmesecure
+  title: AcmeSecure
+  description: Fictional company for an on-premises service catalog proof of concept.
+spec:
+  type: organization
+  profile:
+    displayName: AcmeSecure
+  children:
+    - customer-experience
+    - identity
+    - commerce
+    - cloud-security
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: customer-experience
+  title: Customer Experience
+  description: >-
+    Activation journey and customer notices. Does not own entitlement, identity, or security
+    decisions.
+  links:
+    - url: http://localhost:3000/docs/default/component/onboarding-service/handbook/ownership
+      title: Ownership and escalation
+      icon: docs
+spec:
+  type: team
+  profile:
+    displayName: Customer Experience
+    email: customer-experience@acmesecure.example
+  parent: acmesecure
+  children: []
+  members:
+    - customer-experience-lead
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: customer-experience-lead
+  title: Maya Chen
+  description: Fictional domain lead; example contacts do not deliver messages.
+spec:
+  profile:
+    displayName: Maya Chen
+    email: customer-experience-lead@acmesecure.example
+  memberOf:
+    - customer-experience
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: identity
+  title: Identity
+  description: Tenant identity and customer contact. Does not own plan eligibility or workspace readiness.
+  links:
+    - url: http://localhost:3000/docs/default/component/onboarding-service/handbook/ownership
+      title: Ownership and escalation
+      icon: docs
+spec:
+  type: team
+  profile:
+    displayName: Identity
+    email: identity@acmesecure.example
+  parent: acmesecure
+  children: []
+  members:
+    - identity-lead
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: identity-lead
+  title: Noah Patel
+  description: Fictional domain lead; example contacts do not deliver messages.
+spec:
+  profile:
+    displayName: Noah Patel
+    email: identity-lead@acmesecure.example
+  memberOf:
+    - identity
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: commerce
+  title: Commerce
+  description: Subscription plans and commercial entitlement. Does not make security policy decisions.
+  links:
+    - url: http://localhost:3000/docs/default/component/onboarding-service/handbook/ownership
+      title: Ownership and escalation
+      icon: docs
+spec:
+  type: team
+  profile:
+    displayName: Commerce
+    email: commerce@acmesecure.example
+  parent: acmesecure
+  children: []
+  members:
+    - commerce-lead
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: commerce-lead
+  title: Leila Adams
+  description: Fictional domain lead; example contacts do not deliver messages.
+spec:
+  profile:
+    displayName: Leila Adams
+    email: commerce-lead@acmesecure.example
+  memberOf:
+    - commerce
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: cloud-security
+  title: Cloud Security
+  description: Security policy decisions and workspace placement. Does not own commercial entitlement.
+  links:
+    - url: http://localhost:3000/docs/default/component/onboarding-service/handbook/ownership
+      title: Ownership and escalation
+      icon: docs
+spec:
+  type: team
+  profile:
+    displayName: Cloud Security
+    email: cloud-security@acmesecure.example
+  parent: acmesecure
+  children: []
+  members:
+    - cloud-security-lead
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: cloud-security-lead
+  title: Ivan Petrov
+  description: Fictional domain lead; example contacts do not deliver messages.
+spec:
+  profile:
+    displayName: Ivan Petrov
+    email: cloud-security-lead@acmesecure.example
+  memberOf:
+    - cloud-security
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: guest
+  title: Demo Presenter
+  description: Local guest identity used by the proof of concept.
+spec:
+  profile:
+    displayName: Demo Presenter
+  memberOf:
+    - customer-experience

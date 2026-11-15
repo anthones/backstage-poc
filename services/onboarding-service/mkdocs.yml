@@ -1,0 +1,17 @@
+site_name: Customer Activation
+nav:
+  - Overview: index.md
+  - L1 / L2 runbook: runbook.md
+  - QA and release: qa.md
+  - Activation handbook:
+      - Index: handbook/index.md
+      - Repositories and CI: handbook/repositories.md
+      - Architecture: handbook/architecture.md
+      - Domain vocabulary: handbook/glossary.md
+      - Support routing: handbook/ownership.md
+      - Integration exercise: handbook/incident.md
+      - QA coordination: handbook/handover.md
+      - Walkthrough: handbook/presentation.md
+      - On-premises deployment: handbook/on-prem.md
+plugins:
+  - techdocs-core

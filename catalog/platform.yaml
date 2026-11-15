@@ -1,0 +1,27 @@
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: customer-platform
+  title: Customer Platform
+  description: Customer activation across four domain teams.
+spec:
+  owner: group:default/customer-experience
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: customer-activation
+  title: Customer Activation
+  description: >-
+    End-to-end accountability belongs to Customer Experience; individual services retain domain
+    owners.
+  links:
+    - url: http://localhost:3000/demo
+      title: Engineering handbook
+      icon: dashboard
+    - url: http://localhost:3000/docs/default/component/onboarding-service/handbook
+      title: Architecture and handovers
+      icon: docs
+spec:
+  owner: group:default/customer-experience
+  domain: customer-platform

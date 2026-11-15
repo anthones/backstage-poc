@@ -1,0 +1,67 @@
+name: acmesecure-catalog-demo
+services:
+  tenant-service:
+    build:
+      context: ./services/tenant-service
+    ports:
+      - 127.0.0.1:8081:8081
+    environment:
+      PORT: '8081'
+    init: true
+    restart: unless-stopped
+  subscription-service:
+    build:
+      context: ./services/subscription-service
+    ports:
+      - 127.0.0.1:8082:8082
+    environment:
+      PORT: '8082'
+      TENANT_SERVICE_URL: http://tenant-service:8081
+    init: true
+    restart: unless-stopped
+  policy-service:
+    build:
+      context: ./services/policy-service
+    ports:
+      - 127.0.0.1:8083:8083
+    environment:
+      PORT: '8083'
+      TENANT_SERVICE_URL: http://tenant-service:8081
+      ENABLE_DEMO_CONTROLS: 'true'
+    init: true
+    restart: unless-stopped
+  provisioning-service:
+    build:
+      context: ./services/provisioning-service
+    ports:
+      - 127.0.0.1:8084:8084
+    environment:
+      PORT: '8084'
+      POLICY_SERVICE_URL: http://policy-service:8083
+      SUBSCRIPTION_SERVICE_URL: http://subscription-service:8082
+    init: true
+    restart: unless-stopped
+  notification-service:
+    build:
+      context: ./services/notification-service
+    ports:
+      - 127.0.0.1:8085:8085
+    environment:
+      PORT: '8085'
+      TENANT_SERVICE_URL: http://tenant-service:8081
+    init: true
+    restart: unless-stopped
+  onboarding-service:
+    build:
+      context: ./services/onboarding-service
+    ports:
+      - 127.0.0.1:8086:8086
+    environment:
+      PORT: '8086'
+      TENANT_SERVICE_URL: http://tenant-service:8081
+      SUBSCRIPTION_SERVICE_URL: http://subscription-service:8082
+      POLICY_SERVICE_URL: http://policy-service:8083
+      PROVISIONING_SERVICE_URL: http://provisioning-service:8084
+      NOTIFICATION_SERVICE_URL: http://notification-service:8085
+    init: true
+    restart: unless-stopped

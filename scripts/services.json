@@ -1,0 +1,8 @@
+[
+  "tenant-service",
+  "subscription-service",
+  "policy-service",
+  "provisioning-service",
+  "notification-service",
+  "onboarding-service"
+]
