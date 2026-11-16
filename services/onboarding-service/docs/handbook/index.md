@@ -12,6 +12,7 @@ Customer Experience owns this handbook as part of the onboarding-service reposit
 | Local cross-service failure and recovery | [Integration exercise](incident.md) |
 | Changes involving several teams | [QA coordination](handover.md) |
 | Meeting sequence | [Walkthrough](presentation.md) |
+| Timed speaking notes and screen cues | [Live presentation script](live-event-script.md) |
 | Internal SCM and on-premises deployment | [Configuration path](on-prem.md) |
 
 The local POC runs seeded business previews and uses separate file catalog locations as stand-ins for independently checked-out SCM repositories. Backstage periodically reads each service's YAML. Documentation is built by the repository's own CI script and published locally for this exercise. No remote repositories are created.

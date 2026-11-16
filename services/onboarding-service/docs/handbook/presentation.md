@@ -1,5 +1,7 @@
 # Integration walkthrough
 
+For a shared-screen meeting, use the [live presentation script](live-event-script.md). It includes timed speaking notes, stakeholder benefits, and recovery cues.
+
 ## Preparation
 
 From the workspace root:

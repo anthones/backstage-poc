@@ -12,6 +12,7 @@ nav:
       - Integration exercise: handbook/incident.md
       - QA coordination: handbook/handover.md
       - Walkthrough: handbook/presentation.md
+      - Live presentation script: handbook/live-event-script.md
       - On-premises deployment: handbook/on-prem.md
 plugins:
   - techdocs-core
