@@ -1,0 +1,7 @@
+site_name: Customer Portal
+nav:
+  - Overview: index.md
+  - L1 / L2 runbook: runbook.md
+  - QA and release: qa.md
+plugins:
+  - techdocs-core

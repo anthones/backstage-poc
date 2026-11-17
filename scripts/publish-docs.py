@@ -14,9 +14,9 @@ CACHE = ROOT / "backstage/.techdocs/default/component"
 
 def main():
     CACHE.mkdir(parents=True, exist_ok=True)
-    for service in load_model():
+    for service in [*load_model(), {"name": "customer-portal"}]:
         name = service["name"]
-        source = ROOT / "services" / name / "site"
+        source = ROOT / ("frontend" if name == "customer-portal" else "services") / name / "site"
         assert (source / "techdocs_metadata.json").is_file(), f"Build {name}'s documentation first"
         target = CACHE / name
         with tempfile.TemporaryDirectory(prefix="publish-", dir=CACHE.parent) as temporary:
@@ -31,7 +31,7 @@ def main():
         shutil.rmtree(old_handbook)
     shutil.copyfile(ROOT / "services/onboarding-service/docs/handbook/assets/architecture.svg",
                     ROOT / "backstage/packages/app/public/activation-architecture.svg")
-    print("Published six repository-owned site/ artifacts to Backstage's generated cache.")
+    print("Published seven repository-owned site/ artifacts to Backstage's generated cache.")
 
 
 if __name__ == "__main__":

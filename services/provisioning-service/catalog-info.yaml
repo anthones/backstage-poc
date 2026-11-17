@@ -7,12 +7,17 @@ metadata:
     Owns workspace placement and readiness. Requires both policy approval and commercial
     entitlement; never edits either.
   annotations:
+    jira/project-key: ACT
+    acmesecure.example/jira-label: provisioning-service
     backstage.io/techdocs-ref: dir:.
     acmesecure.example/http-method: GET
     acmesecure.example/http-route: /v1/workspaces/{tenantID}
     acmesecure.example/http-port: '8084'
     acmesecure.example/support-tier: 'L1: Service Desk; L2: Cloud Security'
   links:
+    - url: http://localhost:3000/delivery?component=provisioning-service&source=scenario
+      title: Jira handover example (fictional)
+      icon: dashboard
     - url: http://localhost:8084/healthz
       title: Process health (local)
       icon: dashboard

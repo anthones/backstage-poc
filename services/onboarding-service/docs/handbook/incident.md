@@ -1,5 +1,26 @@
 # Incident exercise: activation fails, Identity is healthy
 
+
+## What the three commands demonstrate
+
+They are a controlled support rehearsal. The customer website on port 8080 makes the same activation request through its own API bridge. The commands give the presenter repeatable controls and readable responses.
+
+| Command | What it changes | What it requests | Why we use it |
+| --- | --- | --- | --- |
+| `happy` | Nothing; it does not reset the fault | Activation for `tenant-acme` | Establish a successful baseline when Policy is available. If an earlier fault is still enabled, it will fail. |
+| `outage` | Enables the demo-only Policy fault | The same activation | Produce a known customer symptom and error evidence, then use Backstage to find the owner and runbook. |
+| `recover` | Disables the demo-only Policy fault | The same activation | Reset the exercise and prove the full request succeeds again. |
+
+Before a presentation, use **recover** to ensure a clean starting state. During the talk, show **happy → outage → recover**, and repeat the website preview after each change. The website's displayed result is the last response, not a live monitor.
+
+### What the audience should learn
+
+A customer-visible failure may come from a service several steps away from the frontend. Evidence identifies the failing boundary; the catalog identifies responsibility and declared relationships; the runbook provides the next action; a fresh customer request checks recovery. Passing that evidence between L1, L2, and the journey coordinator is the handover being demonstrated.
+
+**Backstage does not inject, detect, or repair this outage.** The service code propagates the error and request ID; the demo control sets and clears the fault. This exercise does not demonstrate automated discovery, paging, production remediation, or measured productivity gains. Those need their own integrations and validation.
+
+If presenting all three commands feels repetitive, use `recover` only during preparation, show the successful website request as the baseline, then use `outage` and `recover` as presenter controls. Explain each action before running it.
+
 ## Prepare
 
 Start the demo with `./scripts/start.sh`. Open the [engineering handbook](http://localhost:3000/demo) and a terminal in the workspace root. Commands perform read-only business previews. The policy fault flag is mutable demonstration state only.

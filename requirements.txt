@@ -5,3 +5,4 @@
 -r services/provisioning-service/requirements-dev.txt
 -r services/notification-service/requirements-dev.txt
 -r services/onboarding-service/requirements-dev.txt
+-r frontend/customer-portal/requirements.txt

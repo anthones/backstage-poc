@@ -1,0 +1,155 @@
+[
+  {
+    "key": "ACT-101",
+    "fields": {
+      "summary": "Add a required security control",
+      "status": {
+        "name": "In progress"
+      },
+      "labels": [
+        "policy-service"
+      ],
+      "issuelinks": [
+        {
+          "type": {
+            "outward": "blocks"
+          },
+          "outwardIssue": {
+            "key": "ACT-102"
+          }
+        },
+        {
+          "type": {
+            "outward": "blocks"
+          },
+          "outwardIssue": {
+            "key": "ACT-103"
+          }
+        }
+      ],
+      "handover": "Cloud Security supplies the policy meaning, versioned contract, example response, and rollback artifact."
+    }
+  },
+  {
+    "key": "ACT-102",
+    "fields": {
+      "summary": "Apply the changed policy during workspace preparation",
+      "status": {
+        "name": "Waiting for policy agreement"
+      },
+      "labels": [
+        "provisioning-service"
+      ],
+      "issuelinks": [
+        {
+          "type": {
+            "inward": "is blocked by"
+          },
+          "inwardIssue": {
+            "key": "ACT-101"
+          }
+        },
+        {
+          "type": {
+            "outward": "blocks"
+          },
+          "outwardIssue": {
+            "key": "ACT-103"
+          }
+        }
+      ],
+      "handover": "Consumer team confirms interpretation. QA checks required controls and commercial entitlement together."
+    }
+  },
+  {
+    "key": "ACT-103",
+    "fields": {
+      "summary": "Accept the revised customer activation journey",
+      "status": {
+        "name": "Waiting for consumer evidence"
+      },
+      "labels": [
+        "onboarding-service"
+      ],
+      "issuelinks": [
+        {
+          "type": {
+            "inward": "is blocked by"
+          },
+          "inwardIssue": {
+            "key": "ACT-101"
+          }
+        },
+        {
+          "type": {
+            "inward": "is blocked by"
+          },
+          "inwardIssue": {
+            "key": "ACT-102"
+          }
+        },
+        {
+          "type": {
+            "outward": "blocks"
+          },
+          "outwardIssue": {
+            "key": "ACT-104"
+          }
+        }
+      ],
+      "handover": "Customer Experience coordinates journey acceptance. Attach happy, blocked, outage, and recovery results."
+    }
+  },
+  {
+    "key": "ACT-104",
+    "fields": {
+      "summary": "Explain blocked activation in the customer UI",
+      "status": {
+        "name": "Selected for development"
+      },
+      "labels": [
+        "customer-portal"
+      ],
+      "issuelinks": [
+        {
+          "type": {
+            "inward": "is blocked by"
+          },
+          "inwardIssue": {
+            "key": "ACT-103"
+          }
+        }
+      ],
+      "handover": "BA specifies customer-visible messages and evidence. QA checks that UI and API outcomes agree."
+    }
+  },
+  {
+    "key": "ACT-105",
+    "fields": {
+      "summary": "Agree acceptance examples for suspended subscriptions",
+      "status": {
+        "name": "In review"
+      },
+      "labels": [
+        "subscription-service"
+      ],
+      "issuelinks": [],
+      "handover": "Commerce owns the eligibility decision. Customer Experience confirms the blocked customer journey."
+    }
+  },
+  {
+    "key": "ACT-106",
+    "fields": {
+      "summary": "Publish L1 evidence checklist before release",
+      "status": {
+        "name": "To do"
+      },
+      "labels": [
+        "onboarding-service",
+        "customer-portal"
+      ],
+      "issuelinks": [],
+      "handover": "Support reviews the customer ID, request ID, time, error, escalation route, and recovery verification steps."
+    }
+  }
+]

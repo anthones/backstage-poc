@@ -7,12 +7,17 @@ metadata:
     Owns required security controls and policy version. Subscription eligibility remains a Commerce
     decision.
   annotations:
+    jira/project-key: ACT
+    acmesecure.example/jira-label: policy-service
     backstage.io/techdocs-ref: dir:.
     acmesecure.example/http-method: GET
     acmesecure.example/http-route: /v1/policies/{tenantID}
     acmesecure.example/http-port: '8083'
     acmesecure.example/support-tier: 'L1: Service Desk; L2: Cloud Security'
   links:
+    - url: http://localhost:3000/delivery?component=policy-service&source=scenario
+      title: Jira handover example (fictional)
+      icon: dashboard
     - url: http://localhost:8083/healthz
       title: Process health (local)
       icon: dashboard

@@ -11,4 +11,5 @@ for service_dir in services/*-service; do
   (cd "$service_dir" && "$PYTHON" -m pytest tests/test_contract.py)
   "$service_dir/ci/build-docs.sh"
 done
+"$PYTHON" -m mkdocs build --strict --clean -f frontend/customer-portal/mkdocs.yml -d site
 "$PYTHON" scripts/publish-docs.py

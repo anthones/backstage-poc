@@ -1,8 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 490" role="img" aria-labelledby="title desc">
-<title id="title">Customer activation: six services across four teams</title><desc id="desc">Activation calls Tenant, Subscription, Policy, Provisioning, and Notifications. Provisioning calls Policy and Subscription. Policy, Subscription, and Notifications call Tenant. Ten arrows point from caller to provider.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 490" role="img" aria-labelledby="title desc">
+<title id="title">Customer Portal and six services across four teams</title><desc id="desc">Customer Portal calls Activation and Subscription. Activation calls Tenant, Subscription, Policy, Provisioning, and Notifications. Provisioning calls Policy and Subscription. Policy, Subscription, and Notifications call Tenant. Twelve arrows point from caller to provider.</desc>
 <defs><marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#64748b"/></marker><marker id="journey" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0 0L10 4L0 8Z" fill="#6366f1"/></marker></defs>
-<rect width="1280" height="490" rx="14" fill="#f8fafc"/>
+<rect width="1600" height="490" rx="14" fill="#f8fafc"/>
 
+<g transform="translate(300 0)">
 <path d="M 180 195 C 180 100 210 91 323 91" fill="none" stroke="#818cf8" stroke-width="2.2" marker-end="url(#journey)"/>
 <path d="M 180 287 C 180 391 220 391 323 391" fill="none" stroke="#818cf8" stroke-width="2.2" marker-end="url(#journey)"/>
 <path d="M 300 221 L 950 221" fill="none" stroke="#818cf8" stroke-width="2.2" marker-end="url(#journey)"/>
@@ -19,4 +20,7 @@
 <g><rect x="650" y="45" width="240" height="92" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/><text x="666" y="69" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#d97706">COMMERCE</text><text x="666" y="94" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#0f172a">Subscription Entitlements</text><text x="666" y="118" font-family="system-ui,sans-serif" font-size="12" fill="#475569">Commercial eligibility · 8082</text></g>
 <g><rect x="650" y="345" width="240" height="92" rx="12" fill="#ffe4e6" stroke="#e11d48" stroke-width="1.5"/><text x="666" y="369" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#e11d48">CLOUD SECURITY</text><text x="666" y="394" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#0f172a">Security Policy</text><text x="666" y="418" font-family="system-ui,sans-serif" font-size="12" fill="#475569">Required security controls · 8083</text></g>
 <g><rect x="965" y="195" width="240" height="92" rx="12" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/><text x="981" y="219" font-family="system-ui,sans-serif" font-size="12" font-weight="600" fill="#0d9488">IDENTITY</text><text x="981" y="244" font-family="system-ui,sans-serif" font-size="17" font-weight="700" fill="#0f172a">Tenant Directory</text><text x="981" y="268" font-family="system-ui,sans-serif" font-size="12" fill="#475569">Identity and contact · 8081</text></g>
-<text x="640" y="467" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#475569">Purple: direct activation calls · Gray: shared provider dependencies · All arrows are synchronous HTTP reads</text></svg>
+<text x="640" y="467" text-anchor="middle" font-family="system-ui,sans-serif" font-size="13" fill="#475569">Purple: direct activation calls · Gray: shared provider dependencies · Arrows show declared HTTP calls</text></g>
+<path d="M270 241 L358 241" fill="none" stroke="#126676" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M140 193 C140 12 1070 12 1070 43" fill="none" stroke="#126676" stroke-width="2.5" marker-end="url(#arrow)"/>
+<g font-family="system-ui,sans-serif"><rect x="20" y="195" width="250" height="92" rx="12" fill="#e1eef1" stroke="#126676" stroke-width="1.5"/><text x="36" y="219" font-size="12" fill="#126676" font-weight="600">CUSTOMER EXPERIENCE</text><text x="36" y="244" font-size="17" font-weight="700" fill="#0f172a">Customer Portal</text><text x="36" y="268" font-size="12" fill="#475569">Customer-facing website · 8080</text></g></svg>

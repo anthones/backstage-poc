@@ -100,7 +100,7 @@ app:
               height: 4
     - page:catalog-graph:
         config:
-          rootEntityRefs: [component:default/onboarding-service]
+          rootEntityRefs: [component:default/customer-portal]
           selectedKinds: [Component]
           selectedRelations: [dependsOn]
           maxDepth: 4
@@ -148,6 +148,11 @@ backend:
 integrations: {}
 
 proxy:
+  endpoints:
+    '/jira-poc':
+      target: http://127.0.0.1:8090
+      credentials: require
+      allowedMethods: [GET]
   ### Example for how to add a proxy endpoint for the frontend.
   ### A typical reason to do this is to handle HTTPS and CORS for internal services.
   # endpoints:
@@ -216,6 +221,8 @@ catalog:
       target: ../../../services/notification-service/catalog-info.yaml
     - type: file
       target: ../../../services/onboarding-service/catalog-info.yaml
+    - type: file
+      target: ../../../frontend/customer-portal/catalog-info.yaml
 
 kubernetes:
   # see https://backstage.io/docs/features/kubernetes/configuration for kubernetes configuration options

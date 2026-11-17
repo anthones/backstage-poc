@@ -28,7 +28,7 @@ Backstage TechDocs reader  -> its published documentation artifact
 
 The local workspace uses one `.venv/` for service execution, tests, automation, and MkDocs. A standalone repository creates its own environment from `requirements-dev.txt`. Runtime-only containers install `requirements.txt`. Backstage still requires Node/Yarn.
 
-The local app registers six independent file locations representing SCM checkouts and periodically rereads them. Its 15-second suggested minimum makes updates observable during the exercise; processing remains asynchronous. `backstage/app-config.scm.example.yaml` provides equivalent internal GitLab URL registrations. No remote SCM is running here.
+The local app registers seven independent component file locations (six backend services and the frontend) representing SCM checkouts and periodically rereads them. Its 15-second suggested minimum makes updates observable during the exercise; processing remains asynchronous. `backstage/app-config.scm.example.yaml` provides equivalent internal GitLab URL registrations. No remote SCM is running here.
 
 ## Source, artifact, and publisher cache
 
@@ -67,3 +67,7 @@ From the complete workspace, `.venv/bin/python scripts/verify-repositories.py` p
 These checks verify structural consistency and a checked documentation summary. They cannot prove all narrative instructions remain correct, discover arbitrary dynamic dependencies, or choose domain boundaries. Those remain responsibilities of the owning team and integration reviewers.
 
 [Backstage's catalog processing interval](https://backstage.io/docs/features/software-catalog/configuration/#processing-interval) describes the polling schedule. [FastAPI response models](https://fastapi.tiangolo.com/tutorial/response-model/) describe the typed schemas used for the API snapshots.
+
+## Customer-facing frontend and Jira
+
+`frontend/customer-portal/` owns the website, its same-origin API bridge, catalog record, and TechDocs. Its consumption of two backend APIs is represented in the catalog as dependencies on Subscription and Customer Activation. The documentation publisher includes its seventh site without adding it to the six backend services' API manifest. The Jira adapter reads project/label annotations from component records; see [Jira and delivery](jira.md).

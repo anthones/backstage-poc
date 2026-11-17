@@ -13,8 +13,10 @@ Customer Experience owns this handbook as part of the onboarding-service reposit
 | Changes involving several teams | [QA coordination](handover.md) |
 | Meeting sequence | [Walkthrough](presentation.md) |
 | Timed speaking notes and screen cues | [Live presentation script](live-event-script.md) |
+| Jira connection and product / analysis context | [Jira and delivery](jira.md) |
+| Likely questions and short answers | [Q&A preparation](qa-questions.md) |
 | Internal SCM and on-premises deployment | [Configuration path](on-prem.md) |
 
 The local POC runs seeded business previews and uses separate file catalog locations as stand-ins for independently checked-out SCM repositories. Backstage periodically reads each service's YAML. Documentation is built by the repository's own CI script and published locally for this exercise. No remote repositories are created.
 
-The `/demo` route in Backstage opens this TechDocs handbook. The frontend does not keep a separate authored copy. Each service builds documentation into its own `site/` directory; `backstage/.techdocs/` stores only published copies.
+The `/demo` route in Backstage opens this TechDocs handbook. The frontend does not keep a separate authored copy. Each service and the frontend build documentation into its own `site/` directory; `backstage/.techdocs/` stores only published copies.

@@ -1,6 +1,6 @@
 # AcmeSecure Backstage integration workspace
 
-Six independent Python/FastAPI service repositories run alongside Backstage. `/` is the default software catalog; `/demo` opens the domain-owned engineering handbook through TechDocs. Services, tests, automation, and TechDocs use one local Python virtual environment. Backstage retains its Node/Yarn toolchain. No Go toolchain is required.
+Six independent Python/FastAPI backend service repositories and a customer-facing frontend run alongside Backstage. `/` is the default software catalog; `/demo` opens the domain-owned engineering handbook through TechDocs. Services, tests, automation, and TechDocs use one local Python virtual environment. Backstage retains its Node/Yarn toolchain. No Go toolchain is required.
 
 ## Start locally
 
@@ -12,9 +12,19 @@ Prerequisites: Python 3.12+, Node 22 or 24, and a shell. Initial setup downloads
 ./scripts/start.sh
 ```
 
-Open **http://localhost:3000/** and choose Guest if prompted. Use **http://localhost:3000/demo** for the manual. Keep the runner active; Ctrl-C stops its processes. Logs are `.run/*.log`. Backstage uses ports 3000/7007; the services use 8081–8086.
+Open **http://localhost:3000/** and choose Guest if prompted. Use **http://localhost:3000/demo** for the manual. Keep the runner active; Ctrl-C stops its processes. Logs are `.run/*.log`. Backstage uses ports 3000/7007; the services use 8081–8086. Open the customer website at **http://localhost:8080/** and Backstage's **Jira & delivery** view at **http://localhost:3000/delivery**. The read-only Jira adapter listens on loopback port 8090.
 
 Setup installs all six repositories' development requirements into `.venv/` and uses Backstage's checked-in Yarn release. Every service also installs and runs independently using its own requirements files.
+
+## Presentation
+
+Use the [50-minute live script](services/onboarding-service/docs/handbook/live-event-script.md), followed by [10 minutes of Q&A](services/onboarding-service/docs/handbook/qa-questions.md). It covers the catalog and ingestion, cross-team dependencies, the customer UI, Jira context for product owners and business analysts, and support / QA handovers.
+
+**Customer UI:** [Customer Portal](frontend/customer-portal/README.md) calls Subscription and Customer Activation through its same-origin API bridge. Its catalog record declares both dependencies. The website is separate from Backstage.
+
+**Jira:** the default delivery view makes a real read-only connection to Atlassian's public tracker. Those issues are unrelated to the fictional services. Select the explicitly fictional activation example to follow service-linked work and handovers. No tickets are created or changed; no private Jira account is connected. [Integration details](services/onboarding-service/docs/handbook/jira.md).
+
+**Exercise:** `happy` requests activation without changing the fault; `outage` enables the demo Policy fault and repeats activation; `recover` clears it and repeats activation. Use `recover` before rehearsal, then watch the website outcome after each change. These commands rehearse failure evidence and handover; Backstage does not detect or fix the outage. [Full explanation](services/onboarding-service/docs/handbook/incident.md#what-the-three-commands-demonstrate).
 
 ## Repository ownership
 
@@ -42,12 +52,13 @@ services/<name>/
 | [Workspace Provisioning](services/provisioning-service/README.md) | 8084 | [TechDocs](services/provisioning-service/docs/index.md) |
 | [Customer Notifications](services/notification-service/README.md) | 8085 | [TechDocs](services/notification-service/docs/index.md) |
 | [Customer Activation](services/onboarding-service/README.md) | 8086 | [TechDocs](services/onboarding-service/docs/index.md) |
+| [Customer Portal frontend](frontend/customer-portal/README.md) | 8080 | [TechDocs](frontend/customer-portal/docs/index.md) |
 
 The activation handbook, integration procedures, domain vocabulary, architecture SVG, and [Mermaid source](services/onboarding-service/docs/handbook/architecture.mmd) belong to Customer Experience and live under [onboarding-service/docs/handbook/](services/onboarding-service/docs/handbook/index.md). There is no floating documentation site or separate handbook catalog component. `catalog/` contains only organization/system catalog YAML.
 
 ## Documentation build and serving
 
-1. Each repository checks its committed metadata and generates its own `site/` artifact through `ci/build-docs.sh`.
+1. Each backend repository checks its committed metadata and generates its own `site/` artifact through `ci/build-docs.sh`. The frontend has its own documentation build from `mkdocs.yml`.
 2. `scripts/publish-docs.py` copies those artifacts into `backstage/.techdocs/default/component/<name>/`.
 3. Backstage serves those published copies. `backstage/.techdocs/` is disposable cache/storage, not authored documentation.
 
@@ -55,11 +66,11 @@ The activation handbook, integration procedures, domain vocabulary, architecture
 ./scripts/build-docs.sh
 ```
 
-That command verifies each repository's contract, invokes its own documentation build, and publishes the six artifacts locally. In real CI, each team's pipeline builds and publishes its own artifact to persistent internal TechDocs storage. It does not depend on this workspace's scripts.
+That command verifies each repository's contract, invokes its own documentation build, and publishes the seven artifacts locally. In real CI, each team's pipeline builds and publishes its own artifact to persistent internal TechDocs storage. It does not depend on this workspace's scripts.
 
 ## Catalog ingestion
 
-Backstage registers each service's `catalog-info.yaml` as a separate file location and periodically rereads it. The local suggested minimum interval is 15 seconds; processing is asynchronous. [app-config.scm.example.yaml](backstage/app-config.scm.example.yaml) shows equivalent internal GitLab repository URL locations. It is an example and is not loaded locally. This workspace does not create remote repositories.
+Backstage registers each service's and the frontend's `catalog-info.yaml` as a separate file location and periodically rereads it. The local suggested minimum interval is 15 seconds; processing is asynchronous. [app-config.scm.example.yaml](backstage/app-config.scm.example.yaml) shows equivalent internal GitLab repository URL locations. It is an example and is not loaded locally. This workspace does not create remote repositories.
 
 ## Metadata drift and CI
 
@@ -87,6 +98,8 @@ The second command copies all six repositories into isolated temporary directori
 
 ## Integration exercise
 
+Run `.venv/bin/python -m pytest scripts/test_demo_extensions.py -q` for isolated frontend-bridge and Jira-source checks. Run `.venv/bin/python scripts/verify-extensions.py` against the running demo for customer success / outage / recovery and Jira provenance; add `--public-jira` to verify the live Atlassian connection.
+
 With the workspace running:
 
 ```sh
@@ -107,4 +120,4 @@ These are seeded business previews: no actual tenants, subscriptions, workspaces
 
 ## Containers
 
-Each service builds independently with `docker build services/<name>`. `docker compose up --build` runs all six using separate contexts and internal DNS. Do not run Compose alongside the native service runner on the same ports. Backstage starts separately when using Compose. `./scripts/start.sh --services-only` runs the native services without Backstage.
+Each service builds independently with `docker build services/<name>`; the frontend uses `docker build frontend/customer-portal`. `docker compose up --build` runs the six services and frontend using separate contexts and internal DNS. Do not run Compose alongside the native service runner on the same ports. Backstage starts separately when using Compose. `./scripts/start.sh --services-only` runs the native services, customer UI, and Jira adapter without Backstage. With Compose, start the Jira adapter separately using `.venv/bin/python integrations/jira/main.py` before starting Backstage.

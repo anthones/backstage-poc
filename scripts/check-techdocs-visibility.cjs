@@ -79,3 +79,10 @@ test("an explicitly documented group or shared-docs reference can opt in", () =>
     );
   }
 });
+
+test("customer-facing website documentation stays visible", () => {
+  const entity = yaml.load(
+    fs.readFileSync(path.join(root, "frontend/customer-portal/catalog-info.yaml"), "utf8")
+  );
+  assert.equal(visible(entity), true);
+});

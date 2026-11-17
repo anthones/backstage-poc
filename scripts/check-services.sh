@@ -8,3 +8,4 @@ for service_dir in services/*-service; do
 done
 node scripts/check-catalog.cjs
 node --test scripts/check-techdocs-visibility.cjs
+"$PYTHON" -m pytest scripts/test_demo_extensions.py -q

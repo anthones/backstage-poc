@@ -1,10 +1,10 @@
-# Six services. Ten dependency links.
+# One frontend, six services, twelve dependency links.
 
 ![Customer activation architecture](assets/architecture.svg)
 
 ## Read the map
 
-Customer Activation calls all five providers. Workspace Provisioning needs both security policy and commercial entitlement. Policy, Subscription, and Notifications each share Tenant Directory. These extra reads deliberately model the coordination cost: a change in Identity can affect every team.
+Customer Portal calls Customer Activation and Subscription through its same-origin API bridge. It does not depend on Backstage to perform customer requests. Customer Activation calls all five providers. Workspace Provisioning needs both security policy and commercial entitlement. Policy, Subscription, and Notifications each share Tenant Directory. These extra reads deliberately model the coordination cost: a change in Identity can affect every team.
 
 Arrows indicate caller → provider, not ownership transfer or event flow. Each catalog `dependsOn` link corresponds to an actual HTTP call. `providesApis` and `consumesApis` describe the same boundary as a discoverable contract.
 
@@ -22,6 +22,7 @@ flowchart LR
   classDef security fill:#ffe4e6,stroke:#e11d48,color:#881337
 
   subgraph CX[Customer Experience]
+    F[Customer Portal<br/>Customer-facing website · 8080]
     O[Customer Activation<br/>Journey coordinator · 8086]
     N[Customer Notifications<br/>Welcome preview · 8085]
   end
@@ -36,6 +37,8 @@ flowchart LR
     W[Workspace Provisioning<br/>Placement and readiness · 8084]
   end
 
+  F -->|activation preview| O
+  F -->|subscription check| S
   O -->|identity| T
   O -->|entitlement| S
   O -->|controls| P
@@ -47,7 +50,7 @@ flowchart LR
   W -->|entitlement| S
   N -->|recipient| T
 
-  class O,N cx
+  class F,O,N cx
   class T identity
   class S commerce
   class P,W security
@@ -61,3 +64,7 @@ flowchart LR
 - Provisioning reads both prerequisite decisions and never guesses that a successful identity lookup implies authorization.
 
 The read-only fixtures make these boundaries explicit. A real activation would also need idempotency, durable state, compensation, and a delivery mechanism for notices.
+
+## Planned work alongside the map
+
+The [Jira view](http://localhost:3000/delivery) adds work context. Software dependency arrows and explicit Jira issue links describe different relationships. See [Jira and delivery](jira.md) for the live public source, fictional activation scenario, and product owner / BA examples.

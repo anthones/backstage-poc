@@ -1,5 +1,5 @@
 # Example only: replace host, paths, and credentials for the company's internal SCM.
-# Apply alongside app-config.yaml after the six service folders become real repositories.
+# Apply alongside app-config.yaml after the service and frontend folders become real repositories.
 # This replaces local locations. Each repo's CI still publishes its TechDocs artifact.
 integrations:
   gitlab:
@@ -24,3 +24,5 @@ catalog:
       target: https://gitlab.acmesecure.example/customer-experience/notification-service/-/blob/main/catalog-info.yaml
     - type: url
       target: https://gitlab.acmesecure.example/customer-experience/onboarding-service/-/blob/main/catalog-info.yaml
+    - type: url
+      target: https://gitlab.acmesecure.example/customer-experience/customer-portal/-/blob/main/catalog-info.yaml

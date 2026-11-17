@@ -2,15 +2,18 @@
 
 ## Demonstrated here
 
-- Six independent service repository locations, each periodically read from a local checkout.
+- Six independent service repository locations and one frontend location, periodically read from local checkouts.
 - Repository-local CI verification and documentation artifacts, with no required GitHub token.
 - Team, user, domain, system, component, and API entities.
 - Runtime dependency relationships and discoverable OpenAPI definitions.
 - Prebuilt TechDocs served from local disk, plus catalog and documentation search.
-- Guest access for the local demonstration; six Python/FastAPI processes on loopback.
-- Optional containers for the six services through `docker compose up --build`.
+- Guest access for the local demonstration; six backend services, the customer website, and the Jira adapter on loopback.
+- Optional containers for the six services and frontend through `docker compose up --build`.
+- A read-only connection to Atlassian's public Jira tracker, plus an explicitly fictional service-linked work scenario.
 
 No cloud account, external telemetry, CDN, or external service is required for the POC journey. Initial package installation and container image builds require dependency access unless you supply internal mirrors and preloaded artifacts. The existing Backstage production config is a scaffold and is not a ready deployment of this sibling workspace layout.
+
+The optional live public Jira view requires outbound HTTPS to `jira.atlassian.com`. The fictional handover example works locally. Neither mode connects to private company Jira.
 
 ## Work needed for the company's environment
 
@@ -22,6 +25,7 @@ No cloud account, external telemetry, CDN, or external service is required for t
 | Source and metadata | Publish each self-contained service directory as an internal repository and adapt `backstage/app-config.scm.example.yaml`; keep metadata and docs in the owning repository |
 | Documentation | Use each repository's supplied CI pipeline and publish its `site/` artifact to persistent TechDocs storage after verification passes |
 | Networking | Internal DNS, TLS, reverse proxy, trusted ingress, and approved network routes |
+| Jira | Agree instance, authentication, issue-to-service mapping, and who may view returned work; replace the public-only adapter before using private records |
 | Packaging | Package the catalog sources and documentation with deployment artifacts or use internal SCM; the scaffold Dockerfile alone does not include sibling directories |
 | Supply chain | Mirror approved Python environments, Node packages, Python packages, and base images; pin and review build artifacts |
 | Operations | Health monitoring, logs, backups, restore rehearsal, secret rotation, resource sizing, upgrade process |

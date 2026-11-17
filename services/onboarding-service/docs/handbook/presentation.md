@@ -1,6 +1,6 @@
 # Integration walkthrough
 
-For a shared-screen meeting, use the [live presentation script](live-event-script.md). It includes timed speaking notes, stakeholder benefits, and recovery cues.
+For a Community of Practice meeting, use the [live presentation script](live-event-script.md). The 50-minute presentation starts with a beginner's tour and ingestion, then follows the customer UI through cross-team ownership, dependencies, Jira context for product owners and BAs, and support / QA handovers. Reserve a further 10 minutes for Q&A. It includes speaking notes, screen cues, and demo fallbacks.
 
 ## Preparation
 

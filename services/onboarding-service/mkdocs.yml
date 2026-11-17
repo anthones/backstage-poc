@@ -13,6 +13,8 @@ nav:
       - QA coordination: handbook/handover.md
       - Walkthrough: handbook/presentation.md
       - Live presentation script: handbook/live-event-script.md
+      - Jira and delivery: handbook/jira.md
+      - Q&A preparation: handbook/qa-questions.md
       - On-premises deployment: handbook/on-prem.md
 plugins:
   - techdocs-core

@@ -5,6 +5,7 @@ flowchart LR
   classDef security fill:#ffe4e6,stroke:#e11d48,color:#881337
 
   subgraph CX[Customer Experience]
+    F[Customer Portal<br/>Customer-facing website · 8080]
     O[Customer Activation<br/>Journey coordinator · 8086]
     N[Customer Notifications<br/>Welcome preview · 8085]
   end
@@ -19,6 +20,8 @@ flowchart LR
     W[Workspace Provisioning<br/>Placement and readiness · 8084]
   end
 
+  F -->|activation preview| O
+  F -->|subscription check| S
   O -->|identity| T
   O -->|entitlement| S
   O -->|controls| P
@@ -30,7 +33,7 @@ flowchart LR
   W -->|entitlement| S
   N -->|recipient| T
 
-  class O,N cx
+  class F,O,N cx
   class T identity
   class S commerce
   class P,W security

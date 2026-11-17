@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AcmeSecure · Customer workspace</title>
+<style>
+  :root{font-family:system-ui,sans-serif;color:#18283d;background:#edf2f7}*{box-sizing:border-box}body{margin:0}header{background:#142940;color:white;padding:24px max(24px,calc((100vw - 960px)/2))}header span{color:#99d8e4}main{max-width:960px;margin:48px auto;padding:0 24px}h1{font-size:clamp(30px,5vw,44px);letter-spacing:-1.5px;margin-bottom:14px}p{line-height:1.6}.eyebrow{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#357a87;font-weight:700}.card{background:white;border:1px solid #d8e0e9;border-radius:16px;padding:28px;margin:24px 0;box-shadow:0 10px 30px #20375108}label{display:block;margin-bottom:10px;font-weight:650}select,button{font:inherit;border-radius:8px;padding:12px 16px;border:1px solid #bdcbd8}select{background:#fff;min-width:240px;max-width:100%}.actions{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap}button{cursor:pointer;background:#126676;color:#fff;border-color:#126676;font-weight:650}button.secondary{background:white;color:#126676}button:disabled{opacity:.55;cursor:wait}.result{border-left:5px solid #94a3b8}h2{margin-top:0}.success{border-color:#18825c}.failure{border-color:#b93a41}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6fa;padding:16px;border-radius:8px;font-size:13px}a{color:#126676}small{color:#56687c}.note{padding:16px;background:#e1eef1;border-radius:8px}summary{cursor:pointer;font-weight:650}#evidence{margin-top:16px}
+</style>
+<header><strong>AcmeSecure</strong> <span>/ Customer workspace</span></header>
+<main>
+  <div class="eyebrow">Workspace activation</div>
+  <h1>Get your workspace ready.</h1>
+  <p>Check your subscription, then preview workspace activation.</p>
+  <p class="note"><strong>Presentation demo.</strong> Uses fictional customers. No workspace is created and no email is sent.</p>
+  <section class="card">
+    <label for="tenant">Customer account</label>
+    <select id="tenant"><option value="tenant-acme">Acme · active subscription</option><option value="tenant-suspended">Example · suspended subscription</option><option value="tenant-missing">Example · unknown customer</option></select>
+    <div class="actions"><button id="check" class="secondary">Check subscription</button><button id="activate">Preview activation</button></div>
+    <p><small>Subscription checks use Commerce's service. Activation uses the Customer Activation service and its dependencies.</small></p>
+  </section>
+  <section id="result" class="card result" aria-live="polite" aria-busy="false"><h2 id="heading">Ready when you are</h2><p id="message">Select a customer and choose a preview.</p><details id="evidence" hidden><summary>Support evidence</summary><p id="reference"></p><pre id="payload"></pre></details></section>
+  <p><a href="http://localhost:3000/catalog/default/component/customer-portal" target="_blank" rel="noopener">Find this application in Backstage ↗</a> · <a href="http://localhost:3000/demo" target="_blank" rel="noopener">Engineering handbook ↗</a></p>
+</main>
+<script>
+  const byId = id => document.getElementById(id);
+  let sequence = 0;
+  async function preview(kind) {
+    const current = ++sequence;
+    const tenant = byId('tenant').value;
+    byId('result').className = 'card result';
+    byId('result').setAttribute('aria-busy', 'true');
+    byId('heading').textContent = 'Checking…';
+    byId('message').textContent = 'Waiting for the service response.';
+    byId('evidence').hidden = true;
+    byId('check').disabled = byId('activate').disabled = true;
+    try {
+      const response = await fetch(kind === 'activation' ? '/api/activation' : `/api/subscription?tenant=${encodeURIComponent(tenant)}`, kind === 'activation' ? {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tenant_id:tenant})} : {});
+      const data = await response.json();
+      if (sequence !== current) return;
+      byId('result').className = `card result ${response.ok ? 'success' : 'failure'}`;
+      byId('heading').textContent = response.ok ? (kind === 'activation' ? 'Workspace ready for activation' : 'Subscription active') : (kind === 'activation' ? 'We could not prepare your workspace' : 'Subscription check unsuccessful');
+      const code = data.root_cause?.code;
+      byId('message').textContent = response.ok ? (kind === 'activation' ? 'All required checks passed. This preview has not created a workspace.' : `Your ${data.result.plan} subscription permits access.`) : code === 'subscription_suspended' ? 'This subscription is suspended. Contact the account team before continuing.' : code === 'tenant_not_found' ? 'We could not find this customer account.' : 'A required service could not complete its check. Share the support reference below.';
+      byId('reference').textContent = `Support reference: ${data.request_id || 'not supplied'} · HTTP ${response.status}`;
+      byId('payload').textContent = JSON.stringify(data, null, 2);
+      byId('evidence').hidden = false;
+    } catch {
+      byId('heading').textContent = 'Connection unavailable';
+      byId('message').textContent = 'The customer portal could not reach its local API. Check that the demo is running.';
+      byId('result').className = 'card result failure';
+    } finally {
+      if (sequence === current) {
+        byId('result').setAttribute('aria-busy', 'false');
+        byId('check').disabled = byId('activate').disabled = false;
+      }
+    }
+  }
+  byId('check').onclick = () => preview('subscription');
+  byId('activate').onclick = () => preview('activation');
+  byId('tenant').onchange = () => {
+    ++sequence;
+    byId('result').className = 'card result';
+    byId('result').setAttribute('aria-busy', 'false');
+    byId('heading').textContent = 'Ready when you are';
+    byId('message').textContent = 'Choose a check for the selected customer.';
+    byId('evidence').hidden = true;
+    byId('check').disabled = byId('activate').disabled = false;
+  };
+</script>
+</html>

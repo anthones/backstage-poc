@@ -12,6 +12,7 @@ Customer Experience coordinates the cross-domain activation journey. Each provid
 | Provisioning | [Service docs](http://localhost:3000/docs/default/component/provisioning-service) | [Runbook](http://localhost:3000/docs/default/component/provisioning-service/runbook) | [QA](http://localhost:3000/docs/default/component/provisioning-service/qa) |
 | Notifications | [Service docs](http://localhost:3000/docs/default/component/notification-service) | [Runbook](http://localhost:3000/docs/default/component/notification-service/runbook) | [QA](http://localhost:3000/docs/default/component/notification-service/qa) |
 | Activation | [Service docs](http://localhost:3000/docs/default/component/onboarding-service) | [Runbook](http://localhost:3000/docs/default/component/onboarding-service/runbook) | [QA](http://localhost:3000/docs/default/component/onboarding-service/qa) |
+| Customer Portal frontend | [Website docs](http://localhost:3000/docs/default/component/customer-portal) | [Runbook](http://localhost:3000/docs/default/component/customer-portal/runbook) | [QA](http://localhost:3000/docs/default/component/customer-portal/qa) |
 
 Boundaries and service-level instructions are maintained in those repositories. This directory links to them rather than keeping a second copy.
 

@@ -35,7 +35,11 @@ def main():
             raise AssertionError(f"Expected six ingested APIs; got {len(apis)}. Inspect catalog processing errors.")
         time.sleep(1)
     components = {e["metadata"]["name"]: e for e in entities if e["kind"] == "Component"}
-    assert len(components) == 6, f"Expected exactly six domain-owned documentation sites, got {len(components)} components"
+    assert len(components) == 7, f"Expected six services and one website, got {len(components)} components"
+    portal = components["customer-portal"]
+    assert portal["spec"]["type"] == "website"
+    assert sorted(r["targetRef"] for r in portal["relations"] if r["type"] == "dependsOn") == ["component:default/onboarding-service", "component:default/subscription-service"]
+    assert sorted(r["targetRef"] for r in portal["relations"] if r["type"] == "consumesApi") == ["api:default/onboarding-service-api", "api:default/subscription-service-api"]
     edges = 0
     for service in MODEL:
         entity = components[service["name"]]
@@ -58,7 +62,7 @@ def main():
         assert index["docs"], f"Missing documentation search index: {name}"
         assert "L1" in get(prefix + "runbook/index.html", token, raw=True)
         assert "QA" in get(prefix + "qa/index.html", token, raw=True)
-    for page in ["repositories", "glossary", "ownership", "architecture", "incident", "handover", "presentation", "on-prem"]:
+    for page in ["repositories", "glossary", "ownership", "architecture", "incident", "handover", "presentation", "live-event-script", "qa-questions", "jira", "on-prem"]:
         assert "<article" in get(f"/api/techdocs/static/docs/default/component/onboarding-service/handbook/{page}/index.html", token, raw=True)
     # Search indexing is scheduled; allow the startup task to complete.
     until = time.monotonic() + 90
@@ -69,11 +73,13 @@ def main():
             break
         assert time.monotonic() < until, "TechDocs search did not index the policy runbook"
         time.sleep(2)
-    for path in ["/", "/home", "/demo", "/catalog-graph", "/activation-architecture.svg"]:
+    assert get("/api/proxy/jira-poc/components", token)
+    assert get("/api/proxy/jira-poc/issues?source=scenario&component=customer-portal", token)["source"] == "scenario"
+    for path in ["/", "/home", "/demo", "/delivery", "/catalog-graph", "/activation-architecture.svg"]:
         request = urllib.request.Request("http://localhost:3000" + path, headers={"Accept": "text/html" if not path.endswith(".svg") else "image/svg+xml"})
         with urllib.request.urlopen(request, timeout=10) as response:
             assert response.status == 200
-    print(f"PASS: {len(entities)} ingested entities, six API definitions, ten dependency edges, six repository-owned TechDocs sites, documentation search, and frontend HTTP routes.")
+    print(f"PASS: {len(entities)} ingested entities, six API definitions, twelve dependency edges, seven repository-owned TechDocs sites, Jira proxy, documentation search, and frontend HTTP routes.")
 
 
 if __name__ == "__main__":

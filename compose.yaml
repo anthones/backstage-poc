@@ -1,5 +1,15 @@
 name: acmesecure-catalog-demo
 services:
+  customer-portal:
+    build:
+      context: ./frontend/customer-portal
+    ports:
+      - 127.0.0.1:8080:8080
+    environment:
+      ONBOARDING_SERVICE_URL: http://onboarding-service:8086
+      SUBSCRIPTION_SERVICE_URL: http://subscription-service:8082
+    init: true
+    restart: unless-stopped
   tenant-service:
     build:
       context: ./services/tenant-service

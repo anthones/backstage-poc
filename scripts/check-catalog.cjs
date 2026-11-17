@@ -11,6 +11,7 @@ async function main() {
     "catalog/all.yaml",
     "catalog/org.yaml",
     "catalog/platform.yaml",
+    "frontend/customer-portal/catalog-info.yaml",
     ...manifest.map((s) => `services/${s.name}/catalog-info.yaml`),
   ];
   for (const file of files) {

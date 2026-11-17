@@ -1,0 +1,28 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: customer-portal
+  title: Customer Portal
+  description: Customer-facing subscription and activation preview. The browser uses a same-origin bridge to call two backend APIs.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+    jira/project-key: ACT
+    acmesecure.example/jira-label: customer-portal
+  links:
+    - url: http://localhost:8080
+      title: Open customer application
+      icon: web
+    - url: http://localhost:3000/delivery?component=customer-portal&source=scenario
+      title: Jira handover example (fictional)
+      icon: dashboard
+spec:
+  type: website
+  lifecycle: experimental
+  owner: group:default/customer-experience
+  system: customer-activation
+  consumesApis:
+    - onboarding-service-api
+    - subscription-service-api
+  dependsOn:
+    - component:default/onboarding-service
+    - component:default/subscription-service

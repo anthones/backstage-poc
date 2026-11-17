@@ -44,7 +44,7 @@ def interrupted(_signum, _frame):
 
 
 def main():
-    ports = [s["port"] for s in MODEL] + ([] if SERVICES_ONLY else [3000, 7007])
+    ports = [s["port"] for s in MODEL] + [8080, 8090] + ([] if SERVICES_ONLY else [3000, 7007])
     for port in ports:
         with socket.socket() as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -64,6 +64,12 @@ def main():
             service_env[dep["name"].upper().replace("-", "_") + "_URL"] = f"http://127.0.0.1:{dep['port']}"
         proc = launch(name, [sys.executable, "main.py"], ROOT / "services" / name, service_env)
         wait_for(f"http://127.0.0.1:{port}/healthz", proc, 10)
+    portal_env = dict(os.environ, LISTEN_ADDR="127.0.0.1", PORT="8080", PYTHONUNBUFFERED="1",
+                      ONBOARDING_SERVICE_URL="http://127.0.0.1:8086", SUBSCRIPTION_SERVICE_URL="http://127.0.0.1:8082")
+    portal = launch("customer-portal", [sys.executable, "main.py"], ROOT / "frontend/customer-portal", portal_env)
+    wait_for("http://127.0.0.1:8080/healthz", portal, 10)
+    jira = launch("jira-adapter", [sys.executable, "main.py"], ROOT / "integrations/jira", dict(os.environ, JIRA_ADAPTER_PORT="8090"))
+    wait_for("http://127.0.0.1:8090/healthz", jira, 10)
     if not SERVICES_ONLY:
         print("Starting the existing Backstage app (first compile can take a minute)...", flush=True)
         backend = launch("backstage-backend", ["node", ".yarn/releases/yarn-4.13.0.cjs", "start", "backend"], ROOT / "backstage")
@@ -71,6 +77,7 @@ def main():
         wait_for("http://localhost:7007/.backstage/health/v1/readiness", backend, 180)
         wait_for("http://localhost:3000", frontend, 180)
     print("\nDemo ready: http://localhost:3000/demo" if not SERVICES_ONLY else "\nSix services ready on ports 8081–8086.", flush=True)
+    print("Customer UI: http://localhost:8080 · Jira adapter: http://localhost:8090 · Backstage delivery view: /delivery", flush=True)
     print("Run ./scripts/demo.sh happy or .venv/bin/python scripts/verify.py in another terminal.\nLogs: .run/*.log · Ctrl-C stops only this session's processes.", flush=True)
     while True:
         if any(proc.poll() is not None for proc in children):
