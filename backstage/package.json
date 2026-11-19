@@ -51,7 +51,8 @@
   "resolutions": {
     "@yarnpkg/core": "4.9.1",
     "@types/react": "^18",
-    "@types/react-dom": "^18"
+    "@types/react-dom": "^18",
+    "@backstage/plugin-techdocs-react@npm:^1.4.0": "patch:@backstage/plugin-techdocs-react@npm%3A1.4.0#~/.yarn/patches/@backstage-plugin-techdocs-react-npm-1.4.0-98c34fb1d1.patch"
   },
   "prettier": "@backstage/cli/config/prettier",
   "lint-staged": {

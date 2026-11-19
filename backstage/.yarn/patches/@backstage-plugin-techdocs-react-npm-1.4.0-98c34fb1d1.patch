@@ -1,0 +1,94 @@
+diff --git a/dist/component.esm.js b/dist/component.esm.js
+index ba5e64b27d52b4f25c6baa587a19753452344630..97301bbb534c035923d789c60f566331dd05544b 100644
+--- a/dist/component.esm.js
++++ b/dist/component.esm.js
+@@ -4,35 +4,65 @@ import { create } from 'jss';
+ import { jssPreset, StylesProvider } from '@material-ui/styles';
+ 
+ const SHADOW_DOM_STYLE_LOAD_EVENT = "TECH_DOCS_SHADOW_DOM_STYLE_LOAD";
+-const useShadowDomStylesEvents = (element) => {
++
++const useShadowDomStylesEvents = element => {
+   useEffect(() => {
+-    if (!element) {
+-      return () => {
+-      };
+-    }
++    if (!element) return () => {};
++
+     const styles = Array.from(
+-      element.querySelectorAll(
+-        'head > link[rel="stylesheet"]'
+-      )
+-    ).filter((style) => !style.sheet);
+-    let count = styles.length;
+-    const event = new CustomEvent(SHADOW_DOM_STYLE_LOAD_EVENT);
+-    if (!count) {
+-      element.dispatchEvent(event);
+-      return () => {
+-      };
+-    }
+-    const handleLoad = () => {
+-      if (--count === 0) {
+-        element.dispatchEvent(event);
+-      }
++      element.querySelectorAll('head > link[rel="stylesheet"]'),
++    );
++
++    const pending = new Set(
++      styles.filter(link => !link.sheet),
++    );
++
++    let notified = false;
++    let timer;
++
++    const notify = () => {
++      if (notified || pending.size > 0) return;
++
++      notified = true;
++      clearInterval(timer);
++
++      element.dispatchEvent(
++        new CustomEvent(SHADOW_DOM_STYLE_LOAD_EVENT),
++      );
+     };
+-    styles.forEach((style) => {
+-      style.addEventListener("load", handleLoad);
++
++    const onLoad = event => {
++      pending.delete(event.currentTarget);
++      notify();
++    };
++
++    const onError = event => {
++      const link = event.currentTarget;
++      console.error('TechDocs stylesheet failed:', link.href);
++      pending.delete(link);
++      notify();
++    };
++
++    styles.forEach(link => {
++      link.addEventListener('load', onLoad);
++      link.addEventListener('error', onError);
+     });
++
++    // Recover if the browser missed a load event.
++    timer = setInterval(() => {
++      for (const link of pending) {
++        if (link.sheet) pending.delete(link);
++      }
++      notify();
++    }, 50);
++
++    notify();
++
+     return () => {
+-      styles.forEach((style) => {
+-        style.removeEventListener("load", handleLoad);
++      clearInterval(timer);
++      styles.forEach(link => {
++        link.removeEventListener('load', onLoad);
++        link.removeEventListener('error', onError);
+       });
+     };
+   }, [element]);
