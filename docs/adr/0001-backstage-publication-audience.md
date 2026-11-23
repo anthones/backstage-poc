@@ -1,6 +1,6 @@
 # Backstage: Publication policy
 
-[Overview](../architecture/backstage/README.md) · [Decisions](../architecture/backstage/decision-log.md)
+[Overview](../architecture/backstage/README.md) · [Architecture proposal](../architecture/backstage/RFC-001-backstage-architecture.md)
 
 **Status: Proposed. OpSec approval is pending.**
 
@@ -20,4 +20,4 @@ The alternative is to reproduce source-repository permissions for every publishe
 That can narrow disclosure, but limits the intended cross-team discovery benefit and adds permission-synchronization work.
 
 This record captures proposal intent. It does not record OpSec approval or a deployed access policy.
-See [D-06](../architecture/backstage/decision-log.md).
+See [TechDocs and data ownership](../architecture/backstage/RFC-001-backstage-architecture.md#8-techdocs-and-data-ownership).

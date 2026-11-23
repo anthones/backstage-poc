@@ -1,6 +1,6 @@
 # Backstage adoption
 
-[Overview](docs/architecture/backstage/README.md) · [Decisions](docs/architecture/backstage/decision-log.md)
+[Overview](docs/architecture/backstage/README.md)
 
 This glossary defines terms for the Backstage adoption proposal.
 
@@ -15,7 +15,7 @@ A new Backstage installation from a supported official open-source release selec
 _Avoid_: Existing application deployment
 
 **OpSec approval**:
-The explicit security decision required before InfraOps allocates resources for Backstage.
+The explicit security approval required before InfraOps allocates production resources for Backstage.
 _Avoid_: Documentation approval, NetworkOps approval gate
 
 **Catalog admin**:

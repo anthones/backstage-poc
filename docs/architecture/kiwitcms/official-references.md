@@ -1,91 +1,49 @@
 # KiwiTCMS: Official references
 
-[Overview](README.md)
+[Overview](README.md) · [RFC-002](RFC-002-kiwitcms-adoption.md)
 
-**Reference review date: 2026-11-19. No application release, image or identity integration is selected.**
+**Sources reviewed: 2026-11-19. No production release, image or identity integration is selected.**
 
-These sources support a fresh installation after explicit OpSec approval.
-Online documentation and upstream development code change. InfraOps must verify behavior against the release selected for implementation.
-The reported development experiment is not production, security or capacity evidence.
+Verify these findings against the selected production release. Online documentation and development code change.
 
-## Production, editions and image selection
+## Production and image selection
 
-Upstream requires a containerized production environment. Its Compose example is a starting point, not a complete production design.
-The Community example uses MariaDB and separate persistent volumes for database data and uploads.
-The guide also covers settings overrides and downstream images. It discourages changing the upstream Dockerfile or deploying development branches.
-[Production and customization guide](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html)
+Upstream requires production containers. The Community example uses MariaDB and separate database/upload volumes.
+Use settings overrides or a maintained downstream image. Do not deploy a floating development branch.
+[Production guide](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html)
 
-The public Community image follows a rolling release. Subscribers can obtain version-tagged images.
-InfraOps must preserve an approved image digest or reproducible source build for controlled upgrades and rollback.
-Select a released source version, reviewed changes and a supported production container if building internally.
-[Container distribution](https://kiwitcms.org/containers/)
+The public image is rolling; subscribers can obtain tagged images. Preserve an approved digest or reproducible source build.
+Compare component licenses, paid features and support costs.
+[Images](https://kiwitcms.org/containers/), [edition matrix](https://kiwitcms.org/features/)
 
-The feature matrix lists Community code under GPL-2.0+ and Enterprise under AGPL-3.0+.
-Record the licenses and support terms for every selected component; no commercial subscription is selected by this proposal.
-[Edition matrix](https://kiwitcms.org/features/)
+## Tracking, ads and translation resources
 
-## Privacy and external dependencies
+`ANONYMOUS_ANALYTICS=False` disables supported usage analytics. Development and production defaults differ.
+[Analytics guidance](https://kiwitcms.org/blog/kiwi-tcms-team/2024/02/23/anonymous-analytics-via-plausibleio/)
 
-Upstream documents `ANONYMOUS_ANALYTICS=False` as its analytics opt-out.
-Development-server behavior differs from production; absence of requests during development does not establish the production configuration.
-[Official analytics guidance](https://kiwitcms.org/blog/kiwi-tcms-team/2024/02/23/anonymous-analytics-via-plausibleio/)
+The base template gates Plausible/Scarf requests on that setting. Crowdin translation resources use a separate locale condition.
+Advertising uses a separate EthicalAds include. Hiding ads does not stop requests.
+Verify browser/server traffic in production mode across supported locales.
+[Base template](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/templates/base.html), [ads](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/templates/include/ads.html), [overrides](https://kiwitcms.org/blog/tags/customization/)
 
-The upstream base template places Plausible and Scarf requests behind that analytics condition.
-It separately loads Crowdin translation resources for the Esperanto language code.
-Disabling analytics therefore does not prove removal of the translation CDN.
-Inspect browser traffic across supported languages and verify operation without external access.
-[Base template](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/templates/base.html)
+The internal “Telemetry” area contains test reports and dashboards. Retain these reports while disabling external tracking.
+[Reporting navigation](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/settings/common.py)
 
-Advertising uses a separate EthicalAds template include. The reviewed include does not use the analytics flag.
-Assess a reviewed template override or an appropriate supported image; hiding ads visually does not prevent network requests.
-[Advertising template](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/templates/include/ads.html), [template override guidance](https://kiwitcms.org/blog/tags/customization/)
+## Configuration and access documentation
 
-Kiwi TCMS also calls its internal test-reporting area “Telemetry.” This includes execution dashboards and test-case health reports.
-That application feature is distinct from external usage analytics.
-Removing the reporting module can remove the visibility this platform is intended to provide.
-[Upstream reporting navigation](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/settings/common.py)
+Use the selected release's settings for registration, account activation and identity integration.
+[Settings](https://kiwitcms.readthedocs.io/en/latest/configuration.html), [registration](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/kiwi_auth/views.py), [identity options](https://kiwitcms.org/blog/kiwi-tcms-team/2025/08/28/enterprise-subscription-explained/)
 
-## Registration, activation and authentication
+The upstream administration guide covers groups, permissions and their API limits.
+[Administration guide](https://kiwitcms.readthedocs.io/en/latest/admin.html)
 
-The configuration reference exposes `REGISTRATION_ENABLED`, `USE_CAPTCHA` and `AUTO_APPROVE_NEW_USERS`.
-It documents admin-created accounts when registration is disabled, and manual approval when automatic approval is disabled.
-Prefer that controlled account path over an unverified self-registration shortcut.
-[Configuration reference](https://kiwitcms.readthedocs.io/en/latest/configuration.html)
+## History, recovery and connectors
 
-The registration view treats email confirmation and administrator activation as different paths.
-Disabling email delivery alone does not establish a complete account-provisioning or recovery process.
-Test registration GET/POST requests, account activation, password recovery and offboarding using the selected release.
-[Registration implementation](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/kiwi_auth/views.py)
+Execution records store a case-text history version. Verify old results remain understandable after edits and migration.
+[Case history](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/testcases/models.py), [executions](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/testruns/models.py)
 
-Enterprise bundles OAuth and LDAP add-ons, including GitLab login examples.
-Do not assume a Community installation already provides the same identity integration.
-Assess approved add-ons, their licenses and maintenance costs before promising SSO.
-[Enterprise capabilities](https://kiwitcms.org/blog/kiwi-tcms-team/2025/08/28/enterprise-subscription-explained/)
+Back up and restore database records and attachments together. A database restore alone does not recover uploaded files.
+[Backup guidance](https://kiwitcms.org/blog/atodorov/2018/07/30/how-to-backup-docker-volumes-for-kiwi-tcms/)
 
-## Permissions and record integrity
-
-The default Tester group has broad resource permissions; upgrades can reset the built-in groups.
-Use reviewed custom groups. Normal staff-panel access does not mean superuser authority.
-Object permissions do not protect API operations, and global permissions override object restrictions.
-Deactivate departed users; deletion can remove related records.
-[Administration and permission limits](https://kiwitcms.readthedocs.io/en/latest/admin.html)
-
-Case history and execution records support traceability. Current upstream code records the case-text history version when creating an execution.
-Test that earlier results remain understandable after case edits, cloning and migration.
-These features do not establish the company's release-approval process.
-[Case history](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/testcases/models.py), [execution records](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/testruns/models.py)
-
-## Persistence, recovery and optional connectors
-
-Back up both the database and uploaded evidence. A database-only restore does not restore attachment files.
-The upstream backup article illustrates both data sets; validate a consistent backup and restore method for the selected release.
-[Database and upload backups](https://kiwitcms.org/blog/atodorov/2018/07/30/how-to-backup-docker-volumes-for-kiwi-tcms/)
-
-The bug-tracker model can store API credentials in the application database as plaintext fields.
-If a connector is approved later, treat database access and backups as credential exposure paths.
-Use links initially; assess the connector, secret handling and Jira permissions before enabling API access.
-[Bug-tracker credential model](https://raw.githubusercontent.com/kiwitcms/Kiwi/master/tcms/testcases/models.py)
-
-Production also needs explicit `DEBUG=False`, a unique secret, permitted hostnames, verified TLS and tested session controls.
-None of the proposed configuration changes proves the resulting installation is production-ready.
+Use the selected release’s production configuration guidance.
 [Production settings](https://kiwitcms.readthedocs.io/en/latest/configuration.html)

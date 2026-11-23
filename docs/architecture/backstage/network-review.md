@@ -2,10 +2,10 @@
 
 [Overview](README.md) · [Terms](../../../CONTEXT.md)
 
-**Status: Proposed. Review date: 2026-11-19. Owner: InfraOps; NetworkOps support as needed.**
+**Status: Proposed. Review date: 2026-11-22. Owner: InfraOps; NetworkOps support as needed.**
 
 Backstage will provide a private service catalog and TechDocs. Hosting and network services remain unconfirmed.
-Explicit OpSec approval gates InfraOps allocation. InfraOps owns the network design and can revise these starting requirements.
+Explicit OpSec approval gates InfraOps production allocation. InfraOps owns the network design and can revise these starting requirements.
 NetworkOps supports delivery as needed; this file is not a separate approval gate.
 InfraOps may adapt network choices within OpSec boundaries, but cannot cross them without revised approval.
 
@@ -16,7 +16,7 @@ InfraOps may adapt network choices within OpSec boundaries, but cannot cross the
 3. Complete the connection table for the selected design.
 4. Name the owners for routes, certificates, tunnels and network incidents.
 
-Record the result in [D-03](decision-log.md). Use [RFC-001](RFC-001-backstage-architecture.md) for scope and the proposed installation basis.
+Use [RFC-001](RFC-001-backstage-architecture.md) for scope and the GitLab PoC details.
 
 ## Proposed network and trust boundaries
 
@@ -137,4 +137,4 @@ For VPS/hybrid hosting, what latency, bandwidth and tunnel availability can Netw
 
 **Planning evidence:** selected topology, required flows, DNS/TLS owners and any exceptions for OpSec assessment.
 **Readiness evidence after provisioning:** completed connection table, route tests, failure tests and blocked-access tests.
-InfraOps records the design and results in D-03. Refer security exceptions to [OpSec](security-review.md).
+InfraOps records the selected network design in its implementation notes. OpSec assesses security through the GitLab PoC.

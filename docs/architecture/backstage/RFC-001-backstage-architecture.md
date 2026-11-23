@@ -2,17 +2,17 @@
 
 [Overview](README.md) · [Terms](../../../CONTEXT.md)
 
-## 1. Decision requested
+## 1. Purpose and approval
 
 This proposal starts the Backstage adoption process for service ownership, GitLab metadata and TechDocs.
-InfraOps needs explicit OpSec approval before allocating resources. InfraOps owns the final design and may adapt these options.
-The architecture is a starting point, not the final implementation design. No deployment or security approval has occurred.
+InfraOps needs explicit OpSec approval before allocating production resources. InfraOps owns the final design and may adapt these options.
+The architecture is a starting point, not the final implementation design. Production approval and provisioning remain pending.
 
 Proposed Design: one containerized application, PostgreSQL, and durable private documentation storage.
 GitLab CI builds and publishes TechDocs. GitLab OAuth is the candidate sign-in method.
 Start with Jira, Confluence and operational-tool links.
 
-Decision Pending: hosting, identity authority, storage, secret service, content audience and operational ownership.
+Still to define: hosting, identity authority, storage, secret service, content audience and operational ownership.
 InfraOps selects hosting and coordinates connectivity with NetworkOps as needed.
 
 ## 2. Problem, benefits and constraints
@@ -35,9 +35,16 @@ Install only the modules required for the initial scope. Keep deferred capabilit
 Backstage supports incident work with service context. Monitoring, observability and AWX/Ansible handle detection and response outside Backstage.
 The intended service remains available at all times; the uptime target and support coverage need InfraOps agreement.
 
-## 4. Implementation basis: a fresh upstream OSS installation
+## 4. PoC assessment and production basis
 
-After explicit OpSec approval, InfraOps prepares a new installation from the official open-source Backstage project.
+OpSec requested a small PoC for experiments and checks.
+The requester will upload it to self-managed GitLab and add the repository link here.
+
+**GitLab PoC repository: link pending upload.**
+
+OpSec uses that repository to assess the application and report findings.
+The PoC is assessment material, not an approved production design.
+After explicit production approval, InfraOps prepares a new installation from the official open-source Backstage project.
 This proposal selects no release, package versions or runtime toolchain.
 InfraOps selects a supported release at implementation time and follows its official installation and deployment guidance.
 
@@ -212,7 +219,8 @@ Assignments remain proposed. Name one accountable person and deputy for each ser
 The main risks are copied-content disclosure, incorrect identity mapping, stolen source tokens and compromised plugins/runtime.
 Other risks include tunnel outages, lost state and insufficient maintenance support.
 Hosting capacity, storage compatibility, secret handling, service targets and ownership remain unresolved.
-See [OpSec review](security-review.md) and [Network requirements](network-review.md) for controls, questions and acceptance evidence.
+OpSec will assess security through the [GitLab PoC](#4-poc-assessment-and-production-basis).
+Use [Network requirements](network-review.md) for proposed flows and InfraOps planning.
 
 ## 11. Pilot and expansion criteria
 
@@ -230,9 +238,10 @@ Test the pilot at its actual size. Before expansion, test at least 250 represent
 Review outcomes and remaining risks before rollout to approximately 200 employees or adding restricted content.
 Privileged automation needs a separate approved proposal.
 
-## 12. Required approvals
+## 12. Next steps
 
-OpSec provides the explicit security approval needed for InfraOps allocation, with conditions and required implementation evidence.
+Add the GitLab PoC link, then let OpSec run its experiments and checks.
+OpSec findings define the boundaries for production approval and InfraOps delivery.
 InfraOps owns deployment choices, resources and operational readiness. NetworkOps provides network expertise as InfraOps requires.
 Implementation tests follow resource allocation; complete the required checks before granting user access or publishing internal content.
 InfraOps may revise this proposal within OpSec-approved boundaries. It must not cross those boundaries.

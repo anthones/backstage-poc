@@ -2,10 +2,10 @@
 
 [Overview](README.md) · [Terms](../../../CONTEXT.md)
 
-**Reference review date: 2026-11-19. Status: planning guidance for a new open-source installation after OpSec approval.**
+**Reference review date: 2026-11-19. Status: planning guidance for a new production installation after OpSec approval.**
 
 This proposal selects no Backstage release or dependency version.
-InfraOps will select a supported upstream release and compatible components after explicit OpSec approval.
+InfraOps will select a supported upstream release and compatible components after explicit production approval.
 The sources below describe upstream capabilities and configuration options. They do not establish an approved or working installation.
 
 ## Fresh installation and version selection

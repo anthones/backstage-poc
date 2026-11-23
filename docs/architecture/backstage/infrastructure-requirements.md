@@ -2,20 +2,20 @@
 
 [Overview](README.md) · [Terms](../../../CONTEXT.md)
 
-**Status: Proposed. Review date: 2026-11-19. Owner: InfraOps with Platform Engineering; named operators pending.**
+**Status: Proposed. Review date: 2026-11-22. Owner: InfraOps with Platform Engineering; named operators pending.**
 
-## Decisions required
+## Planning tasks
 
 1. Identify supported hosting, PostgreSQL, storage, secrets, registry and monitoring services.
 2. Compare capacity, cost, private connectivity and support for the hosting options.
 3. Agree resource ranges, recovery targets and named operators.
-4. Allocate resources after explicit OpSec approval. InfraOps owns the final design and may revise these proposals.
+4. Allocate production resources after explicit OpSec approval. InfraOps owns the final design and may revise these proposals.
 
-Use [RFC-001](RFC-001-backstage-architecture.md) for scope and [the decision log](decision-log.md) for approval records.
+Use [RFC-001](RFC-001-backstage-architecture.md) for scope and the GitLab PoC details.
 
-## Fresh upstream installation after approval
+## Production installation after approval
 
-After explicit OpSec approval, InfraOps selects a supported upstream open-source Backstage release and creates a new installation.
+After explicit production approval, InfraOps selects a supported upstream open-source Backstage release and creates a new installation.
 Select runtime and build-tool versions from that release's documented requirements.
 Record the chosen release, dependencies, enabled modules and compatibility results in the implementation record.
 This proposal does not select an application version or assert any existing integration capability.
@@ -142,7 +142,7 @@ Add private synthetic catalog/docs/search/sign-in tests. Keep health/metrics end
 
 Candidate alerts: 5xx above 2% for five minutes, p95 above two seconds, memory above 80%, or free disk below 20%.
 Alert on discovery/index age above two cycles, failed backups and credentials/certificates expiring within 14 days.
-Tune thresholds from pilot measurements. See [OpSec](security-review.md) for audit coverage, retention and patch targets.
+Tune thresholds from pilot measurements. Agree audit coverage, retention and patch targets from OpSec findings on the PoC.
 
 ## Recovery targets and backups
 
@@ -199,18 +199,18 @@ Use the following broader test before expansion. It is not required before alloc
 
 ## Provisioning and acceptance checklist
 
-| Owner                  | Evidence required                                                           | Decisions              |
-| ---------------------- | --------------------------------------------------------------------------- | ---------------------- |
-| Sponsor/Platform       | Named owner, staffing, scope and service targets                            | D-01, D-09             |
-| NetworkOps             | Network design and tests coordinated by InfraOps; no separate approval gate | D-03                   |
-| OpSec/identity admins  | Approved identity, audience, permissions and secrets                        | D-04, D-06, D-07       |
-| InfraOps               | Costed hosting/capacity and named service operators                         | D-02                   |
-| Database operator      | Supported version, roles, pools, persistence and migration tests            | D-14                   |
-| Storage/CI owners      | Durable storage, publisher compatibility and permissions                    | D-05, D-12             |
-| Platform/GitLab admins | Scoped discovery, trusted identities and real owner validation              | D-10                   |
-| Platform/InfraOps      | Approved image/plugins, alerts, restore/load results                        | D-09, D-11, D-13, D-15 |
+| Owner                  | Evidence required                                                           |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Sponsor/Platform       | Named owner, staffing, scope and service targets                            |
+| NetworkOps             | Network design and tests coordinated by InfraOps; no separate approval gate |
+| OpSec/identity admins  | Approved identity, audience, permissions and secrets                        |
+| InfraOps               | Costed hosting/capacity and named service operators                         |
+| Database operator      | Supported version, roles, pools, persistence and migration tests            |
+| Storage/CI owners      | Durable storage, publisher compatibility and permissions                    |
+| Platform/GitLab admins | Scoped discovery, trusted identities and real owner validation              |
+| Platform/InfraOps      | Approved image/plugins, alerts, restore/load results                        |
 
 Which services and capacity exist today? Who supports them, at what cost and hours?
 Can operators meet the intended continuous availability? InfraOps resolves operational choices within OpSec conditions.
-Allocation requires explicit OpSec approval; implementation evidence follows provisioning and precedes user access.
+Production allocation requires explicit OpSec approval; implementation evidence follows provisioning and precedes user access.
 InfraOps cannot cross approved boundaries. Obtain revised OpSec approval before implementing a change beyond them.
