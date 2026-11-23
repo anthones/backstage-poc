@@ -12,7 +12,7 @@ Production approval and provisioning remain pending.
 
 | Reader       | Start here                                                                                                                            | Required outcome                                                  |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| End users    | [User glossary](user-glossary.md)                                                                                                     | Find a service, its owner and its documentation                   |
+| End users    | [User glossary](user-glossary.md)                                                                                                     | Find software, teams, documentation and tool links                |
 | OpSec        | [PoC details](RFC-001-backstage-architecture.md#4-poc-assessment-and-production-basis)                                                | Experiment and run checks using the GitLab PoC                    |
 | InfraOps     | [Infrastructure plan](infrastructure-requirements.md) and [Network requirements](network-review.md)                                   | Select the design and plan implementation within OpSec boundaries |
 | Domain leads | [Architecture proposal](RFC-001-backstage-architecture.md) and [Publication policy](../../adr/0001-backstage-publication-audience.md) | Prepare catalog data and TechDocs content                         |
