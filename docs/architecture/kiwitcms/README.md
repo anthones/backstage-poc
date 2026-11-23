@@ -8,12 +8,13 @@ InfraOps selects the final production design within approved boundaries.
 
 ## Reading order
 
-| Reader               | Start here                                                                            | Outcome                                      |
-| -------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------- |
-| Engineering/QA leads | [RFC-002](RFC-002-kiwitcms-adoption.md)                                               | Agree scope, workflow and pilot measures     |
-| OpSec                | [Working repository](RFC-002-kiwitcms-adoption.md#6-working-repository)               | Experiment and run checks                    |
-| InfraOps             | [Deployment and operations](RFC-002-kiwitcms-adoption.md#7-deployment-and-operations) | Select hosting, build, capacity and recovery |
-| Technical reviewers  | [Official references](official-references.md)                                         | Verify selected-release behavior             |
+| Reader               | Start here                                                                            | Outcome                                       |
+| -------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------- |
+| End users            | [User glossary](user-glossary.md)                                                     | Plan tests, record results and share progress |
+| Engineering/QA leads | [RFC-002](RFC-002-kiwitcms-adoption.md)                                               | Agree scope, workflow and pilot measures      |
+| OpSec                | [Working repository](RFC-002-kiwitcms-adoption.md#6-working-repository)               | Experiment and run checks                     |
+| InfraOps             | [Deployment and operations](RFC-002-kiwitcms-adoption.md#7-deployment-and-operations) | Select hosting, build, capacity and recovery  |
+| Technical reviewers  | [Official references](official-references.md)                                         | Verify selected-release behavior              |
 
 The [Backstage context](../backstage/README.md) supplies shared governance and infrastructure assumptions.
 NetworkOps supports InfraOps as needed; it is not another approval gate.
