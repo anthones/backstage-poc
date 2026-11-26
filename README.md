@@ -120,4 +120,9 @@ These are seeded business previews: no actual tenants, subscriptions, workspaces
 
 ## Containers
 
+For an SSH-based Debian VPS deployment alongside another project, see the
+[deployment guide](docs/deployment/debian-vps.md). It covers server setup,
+building the complete workspace, separate HTTPS hostnames through Caddy,
+persistence, verification, backups, updates, and rollback.
+
 Each service builds independently with `docker build services/<name>`; the frontend uses `docker build frontend/customer-portal`. `docker compose up --build` runs the six services and frontend using separate contexts and internal DNS. Do not run Compose alongside the native service runner on the same ports. Backstage starts separately when using Compose. `./scripts/start.sh --services-only` runs the native services, customer UI, and Jira adapter without Backstage. With Compose, start the Jira adapter separately using `.venv/bin/python integrations/jira/main.py` before starting Backstage.

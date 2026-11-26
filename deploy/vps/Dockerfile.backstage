@@ -1,0 +1,31 @@
+# Context: backstage/. Compile production native dependencies separately so the
+# serving image needs neither a compiler nor a global Yarn/Corepack setup.
+FROM node:24-trixie-slim AS dependencies
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential libsqlite3-dev python3 \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /app && chown node:node /app
+USER node
+WORKDIR /app
+COPY --chown=node:node .yarn ./.yarn
+COPY --chown=node:node .yarnrc.yml backstage.json yarn.lock package.json ./
+COPY --chown=node:node packages/backend/dist/skeleton.tar.gz ./
+RUN tar xzf skeleton.tar.gz && rm skeleton.tar.gz
+ENV NODE_ENV=production
+RUN node .yarn/releases/yarn-4.13.0.cjs workspaces focus --all --production
+
+FROM node:24-trixie-slim
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libsqlite3-0 ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /app && chown node:node /app
+USER node
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=dependencies --chown=node:node /app ./
+COPY --chown=node:node packages/backend/dist/bundle.tar.gz app-config.yaml ./
+RUN tar xzf bundle.tar.gz && rm bundle.tar.gz
+CMD ["node", "packages/backend", "--config", "app-config.yaml", "--config", "/etc/backstage/app-config.vps.yaml"]

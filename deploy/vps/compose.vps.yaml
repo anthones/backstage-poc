@@ -1,0 +1,76 @@
+# Always merge with the root compose.yaml; see docs/deployment/debian-vps.md.
+services:
+  customer-portal:
+    image: acmesecure-vps/customer-portal:${RELEASE_ID:?Set RELEASE_ID}
+    user: '10001:10001'
+    volumes:
+      - ${RELEASE_DIR:?Set RELEASE_DIR}/public/portal-index.html:/app/static/index.html:ro
+    mem_limit: 256m
+  tenant-service:
+    image: acmesecure-vps/tenant-service:${RELEASE_ID:?Set RELEASE_ID}
+    mem_limit: 256m
+  subscription-service:
+    image: acmesecure-vps/subscription-service:${RELEASE_ID:?Set RELEASE_ID}
+    mem_limit: 256m
+  policy-service:
+    image: acmesecure-vps/policy-service:${RELEASE_ID:?Set RELEASE_ID}
+    environment:
+      ENABLE_DEMO_CONTROLS: 'false'
+    mem_limit: 256m
+  provisioning-service:
+    image: acmesecure-vps/provisioning-service:${RELEASE_ID:?Set RELEASE_ID}
+    mem_limit: 256m
+  notification-service:
+    image: acmesecure-vps/notification-service:${RELEASE_ID:?Set RELEASE_ID}
+    mem_limit: 256m
+  onboarding-service:
+    image: acmesecure-vps/onboarding-service:${RELEASE_ID:?Set RELEASE_ID}
+    mem_limit: 256m
+  postgres:
+    image: postgres:17-trixie
+    environment:
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U backstage -d postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    mem_limit: 1g
+    restart: unless-stopped
+  jira-adapter:
+    image: acmesecure-vps/jira-adapter:${RELEASE_ID:?Set RELEASE_ID}
+    build:
+      context: .
+      dockerfile: deploy/vps/Dockerfile.jira
+    init: true
+    mem_limit: 256m
+    restart: unless-stopped
+  backstage:
+    image: acmesecure-vps/backstage:${RELEASE_ID:?Set RELEASE_ID}
+    build:
+      context: ./backstage
+      dockerfile: ../deploy/vps/Dockerfile.backstage
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --no-node-snapshot --max-old-space-size=2048
+      BACKSTAGE_ORIGIN: ${BACKSTAGE_ORIGIN:?Set BACKSTAGE_ORIGIN}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    command: ['node', 'packages/backend', '--config', 'app-config.yaml', '--config', '/etc/backstage/app-config.vps.yaml']
+    ports:
+      - 127.0.0.1:7007:7007
+    volumes:
+      - ${RELEASE_DIR:?Set RELEASE_DIR}/app-config.vps.yaml:/etc/backstage/app-config.vps.yaml:ro
+      - ${RELEASE_DIR:?Set RELEASE_DIR}/public:/published:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jira-adapter:
+        condition: service_started
+    init: true
+    mem_limit: 3g
+    restart: unless-stopped
+volumes:
+  postgres-data:

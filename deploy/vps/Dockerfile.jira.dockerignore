@@ -1,0 +1,15 @@
+**
+!deploy/
+!deploy/vps/
+!deploy/vps/Dockerfile.jira
+!services/
+!services/*/
+!services/*/catalog-info.yaml
+!services/tenant-service/requirements.txt
+!integrations/
+!integrations/jira/
+!integrations/jira/*.py
+!integrations/jira/*.json
+!frontend/
+!frontend/customer-portal/
+!frontend/customer-portal/catalog-info.yaml

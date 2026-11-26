@@ -1,0 +1,53 @@
+# Loaded AFTER app-config.yaml. Do not load the scaffold production config.
+app:
+  baseUrl: ${BACKSTAGE_ORIGIN}
+backend:
+  baseUrl: ${BACKSTAGE_ORIGIN}
+  listen:
+    host: 0.0.0.0
+    port: 7007
+  cors:
+    origin: ${BACKSTAGE_ORIGIN}
+  database:
+    client: pg
+    connection:
+      host: postgres
+      port: 5432
+      user: backstage
+      password: ${POSTGRES_PASSWORD}
+proxy:
+  endpoints:
+    '/jira-poc':
+      target: http://jira-adapter:8090
+      credentials: require
+      allowedMethods: [GET]
+techdocs:
+  builder: external
+  publisher:
+    type: local
+    local:
+      publishDirectory: /published/techdocs
+auth:
+  providers:
+    guest:
+      # Protected demonstration only: Caddy restricts access by client IP.
+      # All visitors still share the same Backstage Guest identity.
+      dangerouslyAllowOutsideDevelopment: true
+catalog:
+  locations:
+    - type: file
+      target: /published/catalog/all.yaml
+    - type: file
+      target: /published/services/tenant-service/catalog-info.yaml
+    - type: file
+      target: /published/services/subscription-service/catalog-info.yaml
+    - type: file
+      target: /published/services/policy-service/catalog-info.yaml
+    - type: file
+      target: /published/services/provisioning-service/catalog-info.yaml
+    - type: file
+      target: /published/services/notification-service/catalog-info.yaml
+    - type: file
+      target: /published/services/onboarding-service/catalog-info.yaml
+    - type: file
+      target: /published/frontend/customer-portal/catalog-info.yaml
