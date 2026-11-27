@@ -6,6 +6,10 @@ builds, persistence, HTTPS, verification, updates, backups, and recovery.
 Commands were reviewed against the repository and official documentation on
 **25 November 2026**. They have not been executed on a real VPS.
 
+Once deployed, use the [LDAP authentication follow-up](ldap-authentication.md)
+to replace Guest sign-in through an existing LDAP-backed identity provider or
+an added Keycloak instance.
+
 The architecture/adoption proposal under `docs/architecture/backstage/` concerns
 a future company installation. This runbook deploys the checked-in PoC; it does
 not turn its seeded business fixtures, shared Guest identity, or allow-all
@@ -396,6 +400,10 @@ an existing initialized database's password.
 [PostgreSQL image initialization](https://hub.docker.com/_/postgres).
 
 ## 8. Deploy the second project separately
+
+If the second project is Kiwi TCMS, use the
+[Kiwi TCMS follow-up](deploy_debian.md) instead of this generic section. It
+assumes the Backstage/server steps are complete and adds Kiwi to the existing Caddy setup.
 
 The other project's implementation is unspecified. This template assumes it
 provides one HTTP container image; replace the image, internal HTTP port, and

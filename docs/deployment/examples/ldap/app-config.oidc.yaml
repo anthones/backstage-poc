@@ -1,0 +1,17 @@
+# Loaded LAST, after app-config.yaml and the existing VPS config.
+auth:
+  environment: production
+  session:
+    secret: ${AUTH_SESSION_SECRET}
+  providers:
+    guest: null
+    oidc:
+      production:
+        metadataUrl: ${AUTH_OIDC_METADATA_URL}
+        clientId: ${AUTH_OIDC_CLIENT_ID}
+        clientSecret: ${AUTH_OIDC_CLIENT_SECRET}
+        callbackUrl: ${BACKSTAGE_ORIGIN}/api/auth/oidc/handler/frame
+        prompt: auto
+        signIn:
+          resolvers:
+            - resolver: emailMatchingUserEntityProfileEmail

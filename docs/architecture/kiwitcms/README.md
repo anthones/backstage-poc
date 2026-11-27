@@ -14,6 +14,7 @@ InfraOps selects the final production design within approved boundaries.
 | Engineering/QA leads | [RFC-002](RFC-002-kiwitcms-adoption.md)                                               | Agree scope, workflow and pilot measures      |
 | OpSec                | [Working repository](RFC-002-kiwitcms-adoption.md#6-working-repository)               | Experiment and run checks                     |
 | InfraOps             | [Deployment and operations](RFC-002-kiwitcms-adoption.md#7-deployment-and-operations) | Select hosting, build, capacity and recovery  |
+| VPS operator         | [Deployment after Backstage](../../deployment/deploy_debian.md)                     | Add Kiwi TCMS to the existing Debian VPS      |
 | Technical reviewers  | [Official references](official-references.md)                                         | Verify selected-release behavior              |
 
 The [Backstage context](../backstage/README.md) supplies shared governance and infrastructure assumptions.

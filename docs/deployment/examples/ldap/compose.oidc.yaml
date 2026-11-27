@@ -1,0 +1,16 @@
+# Third file, following compose.yaml and deploy/vps/compose.vps.yaml.
+services:
+  backstage:
+    env_file:
+      - /etc/acmesecure/oidc.env
+    command:
+      - node
+      - packages/backend
+      - --config
+      - app-config.yaml
+      - --config
+      - /etc/backstage/app-config.vps.yaml
+      - --config
+      - /etc/backstage/app-config.oidc.yaml
+    volumes:
+      - /etc/acmesecure/app-config.oidc.yaml:/etc/backstage/app-config.oidc.yaml:ro

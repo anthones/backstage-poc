@@ -1,0 +1,59 @@
+import { OAuth2 } from '@backstage/core-app-api';
+import type {
+  BackstageIdentityApi,
+  OpenIdConnectApi,
+  ProfileInfoApi,
+  SessionApi,
+} from '@backstage/core-plugin-api';
+import { SignInPage } from '@backstage/core-components';
+import {
+  ApiBlueprint,
+  configApiRef,
+  createApiRef,
+  createFrontendModule,
+  discoveryApiRef,
+  oauthRequestApiRef,
+} from '@backstage/frontend-plugin-api';
+import { SignInPageBlueprint } from '@backstage/plugin-app-react';
+
+const corporateAuthApiRef = createApiRef<
+  OpenIdConnectApi & ProfileInfoApi & BackstageIdentityApi & SessionApi
+>().with({ id: 'auth.corporate' });
+
+const corporateAuthApi = ApiBlueprint.make({
+  name: 'corporate',
+  params: defineParams => defineParams({
+    api: corporateAuthApiRef,
+    deps: {
+      configApi: configApiRef,
+      discoveryApi: discoveryApiRef,
+      oauthRequestApi: oauthRequestApiRef,
+    },
+    factory: ({ configApi, discoveryApi, oauthRequestApi }) => OAuth2.create({
+      configApi,
+      discoveryApi,
+      oauthRequestApi,
+      environment: configApi.getString('auth.environment'),
+      provider: { id: 'oidc', title: 'Company account', icon: () => null },
+      defaultScopes: ['openid', 'profile', 'email'],
+    }),
+  }),
+});
+
+const corporateSignInPage = SignInPageBlueprint.make({
+  params: {
+    loader: async () => props => (
+      <SignInPage {...props} provider={{
+        id: 'corporate-login',
+        title: 'Company account',
+        message: 'Sign in with your company account',
+        apiRef: corporateAuthApiRef,
+      }} />
+    ),
+  },
+});
+
+export const corporateSignIn = createFrontendModule({
+  pluginId: 'app',
+  extensions: [corporateAuthApi, corporateSignInPage],
+});

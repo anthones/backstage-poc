@@ -125,4 +125,14 @@ For an SSH-based Debian VPS deployment alongside another project, see the
 building the complete workspace, separate HTTPS hostnames through Caddy,
 persistence, verification, backups, updates, and rollback.
 
+After deployment, follow the [LDAP authentication guide](docs/deployment/ldap-authentication.md)
+to replace Guest with corporate sign-in, either through an existing identity
+provider or a new Keycloak connection to LDAP/AD.
+
+To add Kiwi TCMS as the second application on that server, use the
+[Kiwi TCMS deployment guide](docs/deployment/deploy_debian.md). It reuses the
+completed Backstage server setup and Caddy proxy.
+An optional [short Kiwi LDAP guide](docs/deployment/kiwitcms-ldap.md) covers
+directory sign-in for that deployment.
+
 Each service builds independently with `docker build services/<name>`; the frontend uses `docker build frontend/customer-portal`. `docker compose up --build` runs the six services and frontend using separate contexts and internal DNS. Do not run Compose alongside the native service runner on the same ports. Backstage starts separately when using Compose. `./scripts/start.sh --services-only` runs the native services, customer UI, and Jira adapter without Backstage. With Compose, start the Jira adapter separately using `.venv/bin/python integrations/jira/main.py` before starting Backstage.
