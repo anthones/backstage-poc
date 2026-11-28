@@ -1,0 +1,11 @@
+ARG KIWI_BASE
+FROM ${KIWI_BASE}
+USER 0
+RUN /venv/bin/pip install --no-cache-dir \
+    django-python3-ldap==0.16.1 ldap3==2.9.1 pyasn1==0.6.5 \
+    && /venv/bin/pip check
+COPY --chown=1001:0 kiwi_ldap_only.py /Kiwi/kiwi_ldap_only.py
+COPY --chown=1001:0 templates /Kiwi/ldap-templates
+ENV PYTHONPATH=/Kiwi
+LABEL org.acmesecure.kiwitcms.auth="ldap-only"
+USER 1001

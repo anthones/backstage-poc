@@ -1,4 +1,4 @@
-# Deploy Kiwi TCMS alongside the completed Backstage deployment
+# Deploy LDAP-only Kiwi TCMS alongside Backstage
 
 This is the Markdown replacement for `deploy_debian.rst`. It assumes the
 [Backstage Debian VPS guide](debian-vps.md) has been completed successfully,
@@ -6,6 +6,11 @@ This is the Markdown replacement for `deploy_debian.rst`. It assumes the
 TCMS is that second project. The shared server already has the `deploy` SSH/sudo
 account, firewall, Docker Engine/Compose, bounded Docker logs, host Caddy,
 working Backstage/customer hostnames, and the configured Restic backup service.
+
+Kiwi uses **LDAP credentials only**, with no local password fallback, SMTP,
+email verification, or activation messages. New eligible directory users get
+active Kiwi profiles on first successful login; Kiwi roles are assigned
+separately. Administrator recovery uses the VPS SSH/sudo control plane.
 
 Keep those services running. Add an independent Kiwi stack and one Caddy
 hostname; do not install host Nginx or Certbot, recreate server access, or run
@@ -15,8 +20,53 @@ continues to apply to Backstage; it does not automatically sign users into Kiwi.
 Commands run in **Bash as `deploy` on the VPS**, using sudo where shown, unless
 marked **workstation**. Replace example domains, source URL and reviewed commit
 before executing. Stop and investigate a failed command before continuing.
-The guide and upstream behavior were reviewed on **27 November 2026**; these
+The guide and upstream behavior were reviewed on **28 November 2026**; these
 Kiwi deployment commands have not been exercised against your running VPS.
+
+### Exact files and values to change
+
+The worked directory is **Active Directory over LDAPS**. Get the real values
+from NetOps before publishing Kiwi. OpenLDAP/StartTLS requires corresponding
+username, schema and TLS changes in the settings template; do not copy the AD
+formatter unchanged.
+
+| File on the VPS | Required change |
+| --- | --- |
+| `/srv/kiwitcms/.env` | Set `KIWI_FQDN`, `LDAP_URL`, `LDAP_SEARCH_BASE`, `LDAP_DOMAIN`, and NetOps-approved `LDAP_REQUIRED_FILTER`; select the final LDAP-enabled `KIWI_IMAGE` |
+| `/srv/kiwitcms/compose.yaml` | Pass all four `LDAP_*` values to web and mount `ldap-ca.pem`; remove any old `SMTP_PASSWORD`/mail environment entries |
+| `/srv/kiwitcms/local_settings.py` | Use the supplied LDAP-only settings: two custom backend paths, no stock `ModelBackend` login, dummy mail backend, blocked local account flows, and custom login template |
+| `/srv/kiwitcms/ldap/kiwi_ldap_only.py` | Copy the supplied backend/middleware code into the image; guards synchronous/asynchronous inactive logins and preserves global/Guardian permissions |
+| `/srv/kiwitcms/ldap/Dockerfile.ldap` | Build the pinned LDAP packages and custom code on each reviewed Kiwi base image |
+| `/srv/kiwitcms/ldap/templates/registration/custom_login.html` | Company-directory login form without registration or password-reset links; copied into the image |
+| `/srv/kiwitcms/ldap-ca.pem` | Install the verified directory CA chain; this is separate from Caddy's public/upstream certificates |
+| `/usr/local/sbin/kiwi-backup` | Include the LDAP code/templates and CA in its config archive, as shown in section 9 |
+
+The actual source templates are in
+[`examples/kiwitcms-ldap/`](examples/kiwitcms-ldap/). `AUTHENTICATION_BACKENDS`
+must be exactly `kiwi_ldap_only.LDAPOnlyBackend` and
+`kiwi_ldap_only.ObjectPermissionsOnlyBackend`. The LDAP backend inherits model
+permission methods, so removing stock `django.contrib.auth.backends.ModelBackend`
+from the list disables local password login without removing those permissions.
+The second backend supplies Guardian object permissions and never authenticates.
+
+If Kiwi is **already installed**, do not rerun clone/secret initialization or
+database migrations from the fresh-install path. Take a backup, pause Kiwi's
+backup/cleanup jobs, copy the new LDAP templates, build the derived image, and
+merge the listed config changes while Kiwi web is stopped. Preserve the
+database password, secret key, uploads, FQDN and TLS material. Review existing
+username/privilege collisions before an LDAP account is mapped to an old Kiwi
+row. Clear existing Kiwi sessions at cutover with:
+
+```bash
+sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py shell -c \
+  'from django.contrib.sessions.models import Session; Session.objects.all().delete()'
+```
+
+That signs out Kiwi users only. Validate the final image/config, run section 5's
+LDAP-administrator promotion command, then recreate web and resume the jobs.
+An old local administrator password will no longer work, even during an LDAP
+outage. Repair directory/configuration access through SSH; do not add a local
+authentication backend as an automatic recovery path.
 
 Jump to: [build](#2-obtain-and-build-a-reviewed-release),
 [configuration](#3-configure-kiwi-and-its-database),
@@ -106,17 +156,32 @@ resume with `tmux attach -t kiwi-build`. Inside the build session:
 cd /srv/kiwitcms/source
 KIWI_COMMIT="$(git rev-parse HEAD)"
 KIWI_RELEASE="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+BASE_IMAGE="local/kiwitcms-base:$KIWI_RELEASE"
 KIWI_IMAGE="local/kiwitcms:$KIWI_RELEASE"
 sudo docker build --pull --target kiwitcms \
   --label "org.opencontainers.image.revision=$KIWI_COMMIT" \
-  -t "$KIWI_IMAGE" .
+  -t "$BASE_IMAGE" .
+KIWI_GUIDE_FILES=/srv/acmesecure/repo/docs/deployment/examples/kiwitcms-ldap
+install -d -m 0755 /srv/kiwitcms/ldap
+cp "$KIWI_GUIDE_FILES/Dockerfile.ldap" "$KIWI_GUIDE_FILES/kiwi_ldap_only.py" /srv/kiwitcms/ldap/
+cp -R "$KIWI_GUIDE_FILES/templates" /srv/kiwitcms/ldap/
+sudo docker build --build-arg "KIWI_BASE=$BASE_IMAGE" \
+  -f /srv/kiwitcms/ldap/Dockerfile.ldap -t "$KIWI_IMAGE" /srv/kiwitcms/ldap
 sudo docker image inspect "$KIWI_IMAGE" --format '{{.Id}}'
 printf '%s\n' "$KIWI_IMAGE" > /srv/kiwitcms/candidate-image.txt
 ```
 
+Deploy the **final derived image**, not `local/kiwitcms-base`. The LDAP context
+contains only its code/templates; no `.env`, private keys or uploads. The
+Dockerfile pins `django-python3-ldap==0.16.1`, `ldap3==2.9.1` and
+`pyasn1==0.6.5`, installs the guard module under `/Kiwi`, and sets
+`PYTHONPATH=/Kiwi` so management commands and uWSGI use the same code. Verify
+package compatibility with the selected Kiwi Python/Django versions through
+the application checks below. Do not install packages into a running container.
+
 A unique tag preserves earlier builds, but the source commit alone does not
 make the image byte-for-byte reproducible: base images and build dependencies
-can change. Retain the exact built artifact or push it to a retained private
+can change. Retain the exact final LDAP-enabled artifact or push it to a retained private
 registry. Keep all secrets outside the source checkout and build context.
 
 ## 3. Configure Kiwi and its database
@@ -151,6 +216,10 @@ KIWI_FQDN=tcms.example.com
 KIWI_DB_PASSWORD=$(openssl rand -hex 32)
 MARIADB_ROOT_PASSWORD=$(openssl rand -hex 32)
 KIWI_SECRET_KEY=$(openssl rand -hex 48)
+LDAP_URL=ldaps://dc.company.example:636
+LDAP_SEARCH_BASE=OU=People,DC=company,DC=example
+LDAP_DOMAIN=company.example
+LDAP_REQUIRED_FILTER='(&(memberOf=CN=KiwiUsers,OU=Groups,DC=company,DC=example)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))'
 EOF
 set +o noclobber
 chmod 0600 .env
@@ -162,18 +231,22 @@ Changing an env-file password does not rotate credentials in an initialized
 MariaDB volume. Resolved Compose configuration can expose secrets; use
 `config --quiet` and keep `.env` out of Git and issue reports.
 
-Create the settings and worker override:
+Replace **all four LDAP values** with NetOps' actual settings using `nano .env`.
+The example filter restricts direct AD group membership and excludes disabled
+accounts; nested groups or a different schema need NetOps' corresponding
+predicate. An eligible user binds with their directory password and must be
+able to read their own profile. End-user passwords do not belong in `.env`.
+Allow container/VPN egress to the approved LDAPS endpoint; public inbound rules
+are unchanged. `mail` is profile metadata, not an activation requirement.
+
+Install the verified directory CA chain and the complete LDAP-only settings.
+The settings are a Python module, so they import Kiwi defaults explicitly; they
+do not rely on variables leaking from the parent settings module:
 
 ```bash
-cat > local_settings.py <<'PYTHON'
-import os
-
-DEBUG = False
-ALLOWED_HOSTS = [os.environ["KIWI_FQDN"], "127.0.0.1", "localhost"]
-CSRF_TRUSTED_ORIGINS = ["https://" + os.environ["KIWI_FQDN"]]
-REGISTRATION_ENABLED = False
-AUTO_APPROVE_NEW_USERS = False
-PYTHON
+cd /srv/kiwitcms
+sudo install -m 0644 /PATH/TO/NETOPS-LDAP-CA.pem /srv/kiwitcms/ldap-ca.pem
+cp /srv/acmesecure/repo/docs/deployment/examples/kiwitcms-ldap/local_settings.py ./local_settings.py
 cat > uwsgi.override <<'UWSGI'
 [uwsgi]
 processes = 2
@@ -181,9 +254,31 @@ UWSGI
 chmod 0644 local_settings.py uwsgi.override
 ```
 
-Local health-check hostnames are included without allowing arbitrary public
-hosts. Registration starts disabled; create accounts administratively.
-The image already enables secure cookies and HTTPS enforcement. The worker
+Review `local_settings.py` before starting. Its effective policy includes:
+
+```python
+REGISTRATION_ENABLED = False
+AUTO_APPROVE_NEW_USERS = False
+AUTHENTICATION_BACKENDS = [
+    "kiwi_ldap_only.LDAPOnlyBackend",
+    "kiwi_ldap_only.ObjectPermissionsOnlyBackend",
+]
+EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+EMAIL_HOST = EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = ""
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = ""
+```
+
+The full file also configures strict LDAPS certificate validation, AD username
+mapping, the required eligibility filter, middleware blocking local account
+flows, a company-login template, and console logging instead of mail-to-admin
+handlers. **Do not append the stock `ModelBackend`**: doing so restores local
+password sign-in. `AUTO_APPROVE_NEW_USERS` does not govern LDAP provisioning;
+the backend creates active users after directory authentication, without mail.
+An existing Kiwi account explicitly marked inactive stays blocked in both sync
+and async login paths. Do not blanket-activate old inactive users.
+
+Local health-check hostnames remain included without allowing arbitrary public
+hosts. The image already enables secure cookies and HTTPS enforcement. The worker
 override prevents Kiwi from allocating a worker for every host CPU; tune the
 limits and worker count from measurements.
 [Kiwi settings](https://kiwitcms.readthedocs.io/en/latest/configuration.html),
@@ -228,6 +323,7 @@ services:
       - ./local_settings.py:${KIWI_SETTINGS_PATH:?Set KIWI_SETTINGS_PATH}:ro
       - ./uwsgi.override:/Kiwi/etc/uwsgi.override:ro
       - ./ssl:/Kiwi/ssl:ro
+      - ./ldap-ca.pem:/Kiwi/ldap-ca.pem:ro
     environment:
       KIWI_DB_HOST: db
       KIWI_DB_PORT: '3306'
@@ -236,6 +332,10 @@ services:
       KIWI_DB_PASSWORD: ${KIWI_DB_PASSWORD:?Set KIWI_DB_PASSWORD}
       KIWI_SECRET_KEY: ${KIWI_SECRET_KEY:?Set KIWI_SECRET_KEY}
       KIWI_FQDN: ${KIWI_FQDN:?Set KIWI_FQDN}
+      LDAP_URL: ${LDAP_URL:?Set LDAP_URL}
+      LDAP_SEARCH_BASE: ${LDAP_SEARCH_BASE:?Set LDAP_SEARCH_BASE}
+      LDAP_DOMAIN: ${LDAP_DOMAIN:?Set LDAP_DOMAIN}
+      LDAP_REQUIRED_FILTER: ${LDAP_REQUIRED_FILTER:?Set LDAP_REQUIRED_FILTER}
     cap_drop: [ALL]
     mem_limit: 1g
     restart: unless-stopped
@@ -304,15 +404,43 @@ container does not publish Kiwi's web ports:
 
 ```bash
 sudo /usr/local/sbin/kiwi-compose up -d --wait --wait-timeout 360 db
-sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py initial_setup
+sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py migrate --noinput
+sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py set_domain tcms.example.com
+sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py refresh_permissions --noinput
 ```
 
-Answer the prompts for the initial administrator and set the site domain to
-`tcms.example.com`, without a scheme, port, or path. `initial_setup` creates
-the schema, superuser, site configuration and permissions. Run it only for a
-new database. If it fails partway through, investigate rather than repeatedly
-creating administrators. Later releases use `upgrade`.
-[Initialization and upgrade guidance](https://kiwitcms.readthedocs.io/en/latest/installing_docker.html#initial-configuration-of-running-container).
+Use the real public hostname in `set_domain`, without a scheme or path. These
+are the schema/site/permission steps from Kiwi's initialization command, with
+its **local `createsuperuser` step omitted**. Do not run `initial_setup` in this
+LDAP-only flow. For an existing database, skip these initialization commands;
+later software releases use the normal `upgrade` procedure.
+[Initialization implementation](https://github.com/kiwitcms/Kiwi/blob/master/tcms/core/management/commands/initial_setup.py).
+
+Provision the first administrator by authenticating a real, eligible directory
+user through the configured LDAP backend, then granting that Kiwi profile the
+initial admin flags. The password is prompted, not embedded in shell history
+or the command line. Choose an authorized administrator, not an arbitrary pilot:
+
+```bash
+sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py shell -c '
+from getpass import getpass
+from django.contrib.auth import authenticate
+username = input("Approved LDAP administrator username: ")
+user = authenticate(username=username, password=getpass("Directory password: "))
+if user is None:
+    raise SystemExit("LDAP sign-in failed or the Kiwi profile is inactive; no promotion performed")
+user.is_staff = True
+user.is_superuser = True
+user.set_unusable_password()
+user.save(update_fields=["is_staff", "is_superuser", "password"])
+print("Promoted LDAP user:", user.get_username())
+'
+```
+
+No verification message or activation link is sent. A missing LDAP `mail` value
+is not a reason to invent a local email/password registration. Keep an SSH/sudo
+session and NetOps recovery contact: new web logins require directory access.
+Repeat this controlled promotion for a second LDAP administrator if appropriate.
 
 ```bash
 sudo /usr/local/sbin/kiwi-compose run --rm --no-deps web /Kiwi/manage.py check --deploy
@@ -412,8 +540,8 @@ sudo ss -lntp
 sudo docker stats --no-stream
 ```
 
-In a browser, log into Kiwi, create a normal user and verify that user's
-permissions. Exercise a test plan, case, run and result; upload and download an
+In a browser, sign in as an eligible normal LDAP user and assign/verify that
+profile's Kiwi permissions through the LDAP administrator. Exercise a test plan, case, run and result; upload and download an
 attachment, including a permission-denied download case. Check static assets,
 links, and site domain. The browser should use only `https://tcms.example.com`,
 without `:18443` or the private upstream name.
@@ -425,53 +553,76 @@ address. Review real-IP trust separately before changing those controls.
 
 ## 8. Complete application settings and scheduled cleanup
 
-### SMTP and account provisioning
+### LDAP accounts, permissions and disabled email flows
 
-Public self-registration is disabled. Create users through Kiwi administration
-and assign the appropriate groups/permissions. A Backstage LDAP/OIDC setup does
-not automatically configure Kiwi's identity or permissions.
+Users sign in with their directory username and password. The LDAP backend
+creates their local Kiwi profile on first successful sign-in and updates mapped
+profile fields on later logins. It does not use email activation and does not
+wait for `AUTO_APPROVE_NEW_USERS`. Eligibility is enforced by the directory base
+and `LDAP_REQUIRED_FILTER`; use NetOps' approved group/disabled-account filter.
 
-For direct directory sign-in, see the [short Kiwi LDAP guide](kiwitcms-ldap.md).
+Assign Kiwi roles to those existing LDAP-created profiles. `Tester` membership,
+admin-site staff access, and superuser status are separate permission choices;
+do not grant them to every LDAP user automatically. Never create a local web
+password as a recovery workaround. The configured LDAP backend checks local
+`is_active` too, so a deliberately deactivated Kiwi profile stays blocked.
 
-Configure SMTP before relying on password reset or notifications. In
-`/srv/kiwitcms/local_settings.py`, add the settings for your actual relay:
+The final settings discard outgoing email through
+`django.core.mail.backends.dummy.EmailBackend`, remove SMTP credentials and use
+console error logging. There is **no SMTP setup, sendtestemail command, mailbox
+verification, or activation step**. LDAP email is optional profile metadata.
+Directory password recovery belongs to NetOps, not Kiwi's password-reset form.
 
-```python
-EMAIL_HOST = "smtp.example.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-EMAIL_HOST_USER = "smtp-user"
-EMAIL_HOST_PASSWORD = os.environ["SMTP_PASSWORD"]
-SERVER_EMAIL = DEFAULT_FROM_EMAIL = "kiwi@example.com"
-```
+The supplied middleware returns 404 for these account-changing routes before
+upstream views execute:
 
-Use the protected `.env` editor to add `SMTP_PASSWORD`, then add this entry
-under `web.environment` in `compose.yaml`:
+- `/accounts/register/`, `/accounts/confirm/...`, and `/accounts/passwordreset/...`;
+- `/accounts/<id>/reset-user-email/`, which otherwise deactivates a profile and sends an activation email;
+- Django admin password-change routes and the local-user creation form.
 
-```yaml
-      SMTP_PASSWORD: ${SMTP_PASSWORD:?Set SMTP_PASSWORD}
-```
+The custom login form omits registration/reset links. Some upstream signed-in
+user-menu links may still reference directory-managed account actions; their
+routes return the explicit directory-management response instead of changing a
+password/email or sending mail. Do not remove the server-side guard merely to
+make those links work.
 
-These are Django settings read explicitly by the override; arbitrary
-`KIWI_EMAIL_*` variables are not automatically interpreted. Use your relay's
-sender verification and network requirements. Then recreate and test:
+Verify the effective configuration inside the serving container:
 
 ```bash
-cd /srv/kiwitcms
-nano .env
-nano local_settings.py
-nano compose.yaml
-sudo /usr/local/sbin/kiwi-compose config --quiet
-sudo /usr/local/sbin/kiwi-compose up -d --wait web
-sudo /usr/local/sbin/kiwi-compose exec web /Kiwi/manage.py sendtestemail ops@example.com
+sudo /usr/local/sbin/kiwi-compose exec web /Kiwi/manage.py shell -c '
+from django.conf import settings
+from django.contrib.auth import get_backends
+expected = ["kiwi_ldap_only.LDAPOnlyBackend", "kiwi_ldap_only.ObjectPermissionsOnlyBackend"]
+assert list(settings.AUTHENTICATION_BACKENDS) == expected
+assert settings.EMAIL_BACKEND == "django.core.mail.backends.dummy.EmailBackend"
+assert settings.REGISTRATION_ENABLED is False
+assert settings.AUTO_APPROVE_NEW_USERS is False
+assert len(get_backends()) == 2
+print("LDAP-only policy loaded; mail delivery and local password fallback disabled")
+'
 ```
 
-The email test sends a real message when the operator executes it. For
-settings-only edits, restart web; Compose environment/mount edits require
-recreation with `up -d`. Kiwi's default attachment size is 5 MiB, while its
-inner proxy and the Caddy block allow approximately 10 MiB requests. Review
-all application/proxy limits together if changing upload size.
+From an **allowlisted workstation**, confirm the login page offers company
+credentials without a local-reset link, and check that disabled routes return
+404 (a Caddy 403 is an IP-gate result, not proof of the application policy):
+
+```bash
+for path in accounts/register/ accounts/passwordreset/ accounts/confirm/legacy-key/ accounts/1/reset-user-email/ admin/password_change/; do
+  curl --silent --show-error -o /dev/null -w '%{http_code}\n' "https://tcms.example.com/$path"
+done
+```
+
+Test a correct LDAP login, wrong/empty passwords, an ineligible directory user,
+a disabled directory user, a locally inactive Kiwi profile, and a local-only
+account with a previously valid local password. Only active eligible LDAP
+identities may obtain a new session. Exercise browser and enabled RPC/API login
+paths, plus global/object permissions and attachments. An LDAP outage must
+reject new logins rather than falling back to local credentials.
+
+Existing authenticated sessions have their own lifecycle. For offboarding,
+disable the directory account and local Kiwi profile and revoke the relevant
+sessions through the agreed operator process. Changing the LDAP filter alone
+is not an immediate revocation mechanism for every existing session.
 
 ### Session cleanup through the existing systemd host
 
@@ -577,7 +728,7 @@ stopped=yes
   | gzip > "$BACKUP_DIR/database.sql.gz"
 "$COMPOSE" run --rm --no-deps -T --entrypoint tar web \
   -C /Kiwi/uploads -czf - . > "$BACKUP_DIR/uploads.tar.gz"
-tar -czf "$BACKUP_DIR/config.tar.gz" .env compose.yaml local_settings.py uwsgi.override ssl
+tar -czf "$BACKUP_DIR/config.tar.gz" .env compose.yaml local_settings.py uwsgi.override ssl ldap ldap-ca.pem
 KIWI_IMAGE=$(sed -n 's/^KIWI_IMAGE=//p' .env)
 DB_IMAGE=$(sed -n 's/^DB_IMAGE=//p' .env)
 docker image inspect "$KIWI_IMAGE" "$DB_IMAGE" > "$BACKUP_DIR/images.json"
@@ -653,7 +804,9 @@ sudo bash -euc 'set -a; source /etc/acmesecure/backup.env; set +a; restic snapsh
 
 Keep the existing Restic password and repository credentials recoverable
 outside this VPS. The database, config archive, SSL key and uploads are
-confidential and must remain encrypted off-host.
+confidential and must remain encrypted off-host. The archive now also includes
+`ldap/` (Dockerfile, guard module and login template) and `ldap-ca.pem`; LDAP
+connection/eligibility values remain in `.env`. Retain the final derived image.
 
 ## 10. Rehearse restoration away from the live stack
 
@@ -697,8 +850,9 @@ gzip -dc "$RECOVERY/database.sql.gz" \
 /usr/local/sbin/kiwi-compose run --rm --no-deps -T web /Kiwi/manage.py migrate --check
 ```
 
-Before starting recovery web, block outbound SMTP/webhooks or change integration
-settings so this test cannot notify real users or mutate external systems.
+Before starting recovery web, verify the dummy email backend remains selected,
+block external write integrations, and arrange approved LDAP access/test users
+with NetOps. Keep the LDAP-only policy during recovery; do not add local login.
 Start the matching application, using a temporary rehearsal FQDN and Caddy
 configuration when testing full browser behavior:
 
@@ -736,9 +890,12 @@ NEW_REF='REPLACE_WITH_REVIEWED_TAG_OR_FULL_COMMIT'
 git checkout --detach "$NEW_REF"
 NEW_COMMIT="$(git rev-parse HEAD)"
 NEW_RELEASE="$(date -u +%Y%m%dT%H%M%SZ)-$(git rev-parse --short HEAD)"
+NEW_BASE_IMAGE="local/kiwitcms-base:$NEW_RELEASE"
 NEW_IMAGE="local/kiwitcms:$NEW_RELEASE"
 sudo docker build --pull --target kiwitcms \
-  --label "org.opencontainers.image.revision=$NEW_COMMIT" -t "$NEW_IMAGE" .
+  --label "org.opencontainers.image.revision=$NEW_COMMIT" -t "$NEW_BASE_IMAGE" .
+sudo docker build --build-arg "KIWI_BASE=$NEW_BASE_IMAGE" \
+  -f /srv/kiwitcms/ldap/Dockerfile.ldap -t "$NEW_IMAGE" /srv/kiwitcms/ldap
 printf '%s\n' "$NEW_IMAGE" > /srv/kiwitcms/candidate-image.txt
 set -o pipefail
 sudo docker image save "$NEW_IMAGE" | gzip \
@@ -749,6 +906,10 @@ sudo gzip -t "/var/backups/kiwitcms/images/${NEW_IMAGE##*:}.tar.gz"
 Run a successful pre-upgrade backup and record its snapshot ID.
 The backup script records the **deployed image's source label**, rather than
 mistaking the newly checked-out candidate source for the running release.
+The candidate must include the LDAP layer and current guard/template files.
+Review those files when upgrading; deploying only the upstream base image
+would omit the required auth module. Keep the LDAP-only settings and dummy
+email backend through upgrades and recovery.
 
 ```bash
 sudo systemctl start kiwitcms-backup.service
@@ -789,6 +950,8 @@ Do not run old code against the new schema or downgrade MariaDB in place.
 An image-only rollback is appropriate only when the data/schema remain
 compatible. Keep failed-release data for diagnosis, and handle database-series
 updates as a separate tested operation.
+Do not roll back to a local-password-enabled configuration under this policy;
+recover a known-good LDAP-only image/settings pair through SSH instead.
 [Upgrade implementation](https://github.com/kiwitcms/Kiwi/blob/master/tcms/core/management/commands/upgrade.py).
 
 ## 12. Operations and troubleshooting
@@ -827,6 +990,8 @@ the live key/cert with an untested pair or assume ACME renews them.
 | DB authentication fails after env edit | Credentials already stored in MariaDB; env editing does not rotate them |
 | Build/web killed or restarted | Host RAM/disk, configured limits, kernel OOM events and competing Backstage workload |
 | Backup/cleanup timer fails | Journal, running containers, shared lock conflict, repository access and latest successful snapshot |
+| All new logins fail | NetOps LDAPS routing/DNS/CA, AD UPN domain, eligible-user filter and the user's local `is_active`; there is intentionally no local password fallback |
+| User is asked to activate by email | Wrong image/settings or legacy account flow: verify the dummy email backend and account-flow middleware; do not configure SMTP to work around it |
 
 Docker health status alone does not restart an unhealthy but running process.
 Both stacks already use restart policies, and the host already starts Docker

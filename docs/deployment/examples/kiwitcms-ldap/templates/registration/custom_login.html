@@ -1,0 +1,20 @@
+{% extends "registration/login.html" %}
+{% block login_form %}
+  <p>Sign in with your company directory account. Contact your directory administrator for password changes.</p>
+  {{ form.non_field_errors }}
+  <form class="form-horizontal" action="{% url 'tcms-login' %}" method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <div class="form-group">
+      {{ form.username.errors }}
+      <label for="ldap-username">Company username</label>
+      <input id="ldap-username" class="form-control" name="username" type="text" autocomplete="username" required>
+    </div>
+    <div class="form-group">
+      {{ form.password.errors }}
+      <label for="ldap-password">Directory password</label>
+      <input id="ldap-password" class="form-control" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Sign in</button>
+  </form>
+{% endblock %}

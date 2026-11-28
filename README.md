@@ -132,7 +132,8 @@ provider or a new Keycloak connection to LDAP/AD.
 To add Kiwi TCMS as the second application on that server, use the
 [Kiwi TCMS deployment guide](docs/deployment/deploy_debian.md). It reuses the
 completed Backstage server setup and Caddy proxy.
-An optional [short Kiwi LDAP guide](docs/deployment/kiwitcms-ldap.md) covers
-directory sign-in for that deployment.
+The Kiwi guide now requires LDAP-only sign-in with no SMTP or email activation;
+the [short LDAP reference](docs/deployment/kiwitcms-ldap.md) lists the exact files
+and settings involved.
 
 Each service builds independently with `docker build services/<name>`; the frontend uses `docker build frontend/customer-portal`. `docker compose up --build` runs the six services and frontend using separate contexts and internal DNS. Do not run Compose alongside the native service runner on the same ports. Backstage starts separately when using Compose. `./scripts/start.sh --services-only` runs the native services, customer UI, and Jira adapter without Backstage. With Compose, start the Jira adapter separately using `.venv/bin/python integrations/jira/main.py` before starting Backstage.
